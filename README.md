@@ -1,66 +1,319 @@
-## Foundry
+<div align="center">
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+# 🛡️ ERC-5484 On-Chain Reputation System
 
-Foundry consists of:
+### Soulbound Identity · Dynamic NFT Medals · UUPS Upgradeable Engine
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Stack](https://img.shields.io/badge/Stack-Solidity_%7C_Foundry-blueviolet.svg)](https://getfoundry.sh)
+[![Network](https://img.shields.io/badge/Network-Sepolia_Testnet-blue.svg)](https://sepolia.etherscan.io/)
+[![Standard](https://img.shields.io/badge/Standard-ERC--5484_Soulbound-orange.svg)](https://eips.ethereum.org/EIPS/eip-5484)
+[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](https://github.com/NexTechArchitect)
 
-## Documentation
+<p align="center">
+  <br>
+  <b>A fully on-chain reputation protocol built on ERC-5484 Soulbound Tokens.</b><br>
+  <i>Wallet behaviour tracked on-chain. Score evolves. Medal art upgrades automatically. No IPFS dependency.</i>
+  <br>
+</p>
 
-https://book.getfoundry.sh/
+<br>
 
-## Usage
+<p align="center">
+  <a href="https://github.com/NexTechArchitect">💻 Source Code</a> •
+  <a href="https://sepolia.etherscan.io/address/0x9c77Ce31a110e360d62e4eF8B1F4cf8576F70F46">🔗 ReputationToken</a> •
+  <a href="https://sepolia.etherscan.io/address/0x4eFC1adc7Dd594C4bB04865B6dCc5101392FaBD8">🔗 Engine Proxy</a> •
+  <a href="https://sepolia.etherscan.io/address/0xd53320CDEF6f3DfA54436D2806e765d6d6bD98b6">🔗 ReputationVault</a>
+</p>
 
-### Build
+</div>
 
-```shell
-$ forge build
+---
+
+## 🦅 Executive Summary
+
+On-chain identity is broken. Wallets are anonymous. There is no way to distinguish a DeFi power user from a fresh wallet. **This protocol fixes that.**
+
+The ERC-5484 Reputation System assigns every wallet a **Soulbound Token** — non-transferable, non-mintable by the holder — that reflects their on-chain behaviour score. As the wallet performs positive actions (DAO votes, loan repayments, airdrop holding), their score rises and their medal art upgrades **automatically with no re-mint required**.
+
+The scoring engine is **UUPS upgradeable** — logic can evolve as the protocol matures. The token contract is **intentionally immutable** — SBT ownership records are the ground truth of on-chain identity and must be permanent.
+
+---
+
+## 📑 Table of Contents
+
+1. [🏛️ Architecture](#-architecture)
+2. [✅ Deployed Contracts](#-deployed-contracts)
+3. [🎖️ Reputation Tiers & Medal System](#-reputation-tiers--medal-system)
+4. [⚙️ Scoring Actions](#-scoring-actions)
+5. [🧩 Smart Contract Breakdown](#-smart-contract-breakdown)
+6. [🧪 Testing Strategy](#-testing-strategy)
+7. [🚀 Local Setup](#-local-setup)
+8. [🗺️ Roadmap](#-roadmap)
+
+---
+
+## 🏛️ Architecture
+
+The system is split into three layers with clear separation of concerns:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                     USER / DAPP                      │
+│         Wagmi v2 · Viem · RainbowKit (Frontend)      │
+└────────────────────┬────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────┐
+│              REPUTATION VAULT                        │
+│   castVote() · takeLoan() · claimAirdrop() · ...     │
+│   12h / 24h cooldowns · CEI strict · nonReentrant    │
+└────────────────────┬────────────────────────────────┘
+                     │ recordAction()
+┌────────────────────▼────────────────────────────────┐
+│         REPUTATION ENGINE  (UUPS Proxy)              │
+│   Score calculation · Tier resolution · SBT issuer   │
+│   ReputationMath library · Storage gap pattern       │
+└──────────┬──────────────────────────────────────────┘
+           │ issue() / burn()
+┌──────────▼──────────────────────────────────────────┐
+│         REPUTATION TOKEN  (Immutable)                │
+│   ERC-5484 Soulbound · On-chain SVG medals           │
+│   _update() transfer lock · ERC-165 registered       │
+└─────────────────────────────────────────────────────┘
 ```
 
-### Test
+### Key Design Decisions
 
-```shell
-$ forge test
+| Decision | Rationale |
+|---|---|
+| Token is **immutable** | SBT ownership is ground truth — upgradeability would allow silent record tampering |
+| Engine is **UUPS upgradeable** | Scoring logic must evolve; token state must not |
+| **On-chain SVG** medals | Zero IPFS dependency — token lives as long as Ethereum |
+| **Dynamic metadata** | `tokenURI()` reads live score from engine — medal upgrades on score change, no re-mint |
+| **`_mint` not `_safeMint`** | SBTs have no receiver contract — `onERC721Received` is meaningless and adds reentrancy surface |
+| **`_update()` override** | Exhaustively blocks all OZ transfer paths in one hook |
+
+---
+
+## ✅ Deployed Contracts
+
+All contracts deployed and verified on **Ethereum Sepolia Testnet**.
+
+| Contract | Address | Etherscan |
+|---|---|---|
+| **ReputationToken** | `0x9c77Ce31a110e360d62e4eF8B1F4cf8576F70F46` | [🔎 View](https://sepolia.etherscan.io/address/0x9c77Ce31a110e360d62e4eF8B1F4cf8576F70F46) |
+| **ReputationEngine (Impl)** | `0xC81532619d5fB4728932A43A77Bfea04c3df5957` | [🔎 View](https://sepolia.etherscan.io/address/0xC81532619d5fB4728932A43A77Bfea04c3df5957) |
+| **ReputationEngine (Proxy)** | `0x4eFC1adc7Dd594C4bB04865B6dCc5101392FaBD8` | [🔎 View](https://sepolia.etherscan.io/address/0x4eFC1adc7Dd594C4bB04865B6dCc5101392FaBD8) |
+| **ReputationVault** | `0xd53320CDEF6f3DfA54436D2806e765d6d6bD98b6` | [🔎 View](https://sepolia.etherscan.io/address/0xd53320CDEF6f3DfA54436D2806e765d6d6bD98b6) |
+
+> **Interact with the proxy address only** — never the implementation directly.
+
+---
+
+## 🎖️ Reputation Tiers & Medal System
+
+Every wallet's SBT displays a dynamic on-chain SVG medal that reflects their current tier. No IPFS. No centralized server. The medal art is generated entirely in Solidity and upgrades automatically as score increases.
+
+| Tier | Score Range | Medal Design | Voting Power | Loan Limit |
+|---|---|---|---|---|
+| **Unranked** | 0 – 99 | Grey hexagon + `?` | 0.5× | None |
+| **Bronze** 🥉 | 100 – 299 | Copper circle + 6-point star | 1× | 20% of collateral |
+| **Silver** 🥈 | 300 – 599 | Silver circle + 5-point star | 1.5× | 40% of collateral |
+| **Gold** 🥇 | 600 – 849 | Gold circle + crown + gems | 2× | 60% of collateral |
+| **Platinum** 💎 | 850 – 1000 | Platinum ring + diamond | 3× | 80% of collateral |
+
+---
+
+## ⚙️ Scoring Actions
+
+Actions are recorded through the **ReputationVault**. Each action maps to a signed score delta enforced by the `ReputationMath` library. Raw deltas are never exposed — only the `Action` enum is accessible to callers.
+
+| Action | Function | Score Delta | Cooldown |
+|---|---|---|---|
+| DAO Vote | `castVote()` | **+10** | 12 hours |
+| DAO Proposal | `submitProposal()` | **+25** | 24 hours |
+| Loan Repaid | `repayLoan()` | **+30** | None (natural gate) |
+| Loan Defaulted | `markDefault()` | **−50** | None (owner only) |
+| Airdrop Held 30d | `settleAirdrop()` | **+15** | None (natural gate) |
+| Airdrop Dumped | `settleAirdrop()` | **−20** | None (natural gate) |
+| NFT Minted | `mintNFT()` | **+5** | 12 hours |
+
+> Score is always clamped to **[0, 1000]**. Underflow and overflow are impossible by design.
+
+---
+
+## 🧩 Smart Contract Breakdown
+
+```
+src/
+├── ReputationToken.sol       # ERC-5484 SBT — immutable, transfer-locked
+├── ReputationEngine.sol      # UUPS scoring engine — issues SBTs, tracks scores
+├── ReputationVault.sol       # Action simulator — user entry point
+├── interfaces/
+│   ├── IReputationToken.sol  # Full error + event surface for callers
+│   └── IReputationEngine.sol # CEI order + reentrancy requirements documented
+└── libraries/
+    ├── ReputationMath.sol    # Pure math — Action enum, score clamping, tier resolution
+    └── ReputationSVG.sol     # On-chain SVG medal generator — 5 tier designs
 ```
 
-### Format
+### ReputationMath Library — Audit Highlights
 
-```shell
-$ forge fmt
+- **Enum-gated deltas** — arbitrary `int256` deltas are never exposed. Only `Action` enum variants can mutate scores.
+- **Overflow guards** — `_applyDelta()` has early-exit guards for extreme deltas, future-proofing against new high-magnitude actions.
+- **Single guard pattern** — `_assertValidScore()` is called once per public entry point. `_resolveTierUnchecked()` avoids a double-guard in `tierName()`.
+- **Zero state** — pure library. Zero reentrancy surface.
+
+### Security Invariants
+
+| Invariant | Enforced By |
+|---|---|
+| One SBT per wallet | `s_walletToToken[to] != 0` check in `issue()` |
+| Engine address immutable post-deploy | `setEngine()` reverts with `EngineAlreadySet` on second call |
+| Transfer always reverts | `_update()` override — catches all OZ paths |
+| Score always in [0, 1000] | `ReputationMath.applyAction()` — clamped by design |
+| All storage writes before external calls | Strict CEI in `recordAction()` and all Vault functions |
+| No re-entrancy | `nonReentrant` on all state-changing engine + vault functions |
+| SBT auto-issued on first action | `token.issue()` called last in CEI — after all storage writes |
+
+---
+
+## 🧪 Testing Strategy
+
+The project uses a 4-layer testing approach with **Foundry**.
+
+```
+test/
+├── unit/
+│   ├── ReputationMathTest.t.sol    # Score math, tier resolution, delta clamping
+│   ├── ReputationTokenTest.t.sol   # SBT issuance, transfer lock, burn, ERC-5484
+│   ├── ReputationEngineTest.t.sol  # recordAction CEI, auth, score updates
+│   └── ReputationVaultTest.t.sol   # All actions, cooldowns, loan/airdrop lifecycle
+├── integration/
+│   └── ReputationFlowTest.t.sol    # Full lifecycle: Unranked → Bronze → Gold
+└── fuzz/
+    └── FuzzReputation.t.sol        # Score bounds, loan math, SBT uniqueness
 ```
 
-### Gas Snapshots
+### Key Test Scenarios
 
-```shell
-$ forge snapshot
+- **Score never exceeds 1000** — fuzz tested across 50+ random action sequences
+- **Score never underflows to negative** — loan default on zero score → still zero
+- **Cooldown enforcement** — exact timestamp boundary testing
+- **Diamond hands vs paper hands** — airdrop held 30d vs immediate settle
+- **CEI verification** — mock engine tracks call order in vault tests
+- **SBT uniqueness** — fuzz tested across random wallet addresses
+
+### Run Tests
+
+```bash
+# Full suite
+forge test -v
+
+# Vault tests only
+forge test --match-contract ReputationVaultTest -vvvv
+
+# Fuzz tests
+forge test --match-path test/fuzz/* -vvvv
 ```
 
-### Anvil
+---
 
-```shell
-$ anvil
+## 🚀 Local Setup
+
+### Prerequisites
+
+- [Foundry](https://getfoundry.sh) (nightly)
+- Git
+
+### Installation
+
+```bash
+git clone https://github.com/NexTechArchitect/ERC-5484.git
+cd ERC-5484
+
+# Install dependencies
+forge install OpenZeppelin/openzeppelin-contracts --no-commit
+forge install OpenZeppelin/openzeppelin-contracts-upgradeable --no-commit
+forge install foundry-rs/forge-std --no-commit
+```
+
+### Environment Setup
+
+Create a `.env` file:
+
+```bash
+PRIVATE_KEY=0x...
+DEPLOYER_ADDRESS=0x...
+SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
+BASE_RPC_URL=https://mainnet.base.org
+ETHERSCAN_API_KEY=...
+BASESCAN_API_KEY=...
+```
+
+### Build & Test
+
+```bash
+forge build
+forge test -v
 ```
 
 ### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```bash
+# Sepolia
+source .env && forge script script/DeployReputation.s.sol:DeployReputation \
+  --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv
+
+# Base Mainnet
+source .env && forge script script/DeployReputation.s.sol:DeployReputation \
+  --rpc-url $BASE_RPC_URL --broadcast --verify \
+  --etherscan-api-key $BASESCAN_API_KEY -vvvv
 ```
 
-### Cast
+### Interact
 
-```shell
-$ cast <subcommand>
+```bash
+# Cast a vote
+forge script script/Interactions.s.sol:CastVote \
+  --sig "run(address)" <VAULT_ADDRESS> \
+  --rpc-url $SEPOLIA_RPC_URL --broadcast
+
+# Check score and tier
+forge script script/Interactions.s.sol:CheckScore \
+  --sig "run(address,address)" <ENGINE_PROXY> <WALLET> \
+  --rpc-url $SEPOLIA_RPC_URL
 ```
 
-### Help
+---
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+## 🗺️ Roadmap
+
+- [x] ERC-5484 Soulbound Token — immutable, transfer-locked
+- [x] UUPS Upgradeable Engine — score tracking + SBT auto-issuance
+- [x] On-chain SVG medal art — 5 tier designs, dynamic metadata
+- [x] ReputationVault — action simulator with cooldowns
+- [x] Sepolia testnet deployment
+- [ ] Base mainnet deployment
+- [ ] Frontend dashboard — score viewer, action panel, leaderboard
+- [ ] Cross-protocol integration — real DAO / lending protocols call engine directly
+- [ ] Reputation decay — score reduces over time via `getLastActionAt`
+- [ ] Governance integration — voting weight derived from reputation tier
+
+---
+
+## ⚠️ Disclaimer
+
+This repository is for educational and portfolio purposes. The smart contracts implement production-grade patterns and have been thoroughly self-audited, but have **not undergone a formal external security audit**. Do not use with real funds without a professional security review.
+
+---
+
+<div align="center">
+
+**Engineered with ❤️ by [NexTech Architect](https://github.com/NexTechArchitect)**
+
+[Connect on 𝕏 (Twitter)](https://x.com/itZ_AmiT0)
+
+*Smart Contract Developer · Solidity · Foundry · Web3 Engineering*
+
+</div>
