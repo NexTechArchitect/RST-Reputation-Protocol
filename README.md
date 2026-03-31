@@ -287,20 +287,7 @@ forge script script/Interactions.s.sol:CheckScore \
 
 ---
 
-## 🗺️ Roadmap
 
-- [x] ERC-5484 Soulbound Token — immutable, transfer-locked
-- [x] UUPS Upgradeable Engine — score tracking + SBT auto-issuance
-- [x] On-chain SVG medal art — 5 tier designs, dynamic metadata
-- [x] ReputationVault — action simulator with cooldowns
-- [x] Sepolia testnet deployment
-- [ ] Base mainnet deployment
-- [ ] Frontend dashboard — score viewer, action panel, leaderboard
-- [ ] Cross-protocol integration — real DAO / lending protocols call engine directly
-- [ ] Reputation decay — score reduces over time via `getLastActionAt`
-- [ ] Governance integration — voting weight derived from reputation tier
-
----
 
 ## ⚠️ Disclaimer
 
