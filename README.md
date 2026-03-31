@@ -8,7 +8,6 @@
 [![Stack](https://img.shields.io/badge/Stack-Solidity_%7C_Foundry-blueviolet.svg)](https://getfoundry.sh)
 [![Network](https://img.shields.io/badge/Network-Sepolia_Testnet-blue.svg)](https://sepolia.etherscan.io/)
 [![Standard](https://img.shields.io/badge/Standard-ERC--5484_Soulbound-orange.svg)](https://eips.ethereum.org/EIPS/eip-5484)
-[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](https://github.com/NexTechArchitect)
 
 <p align="center">
   <br>
