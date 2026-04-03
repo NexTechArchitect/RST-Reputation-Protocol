@@ -173,7 +173,7 @@ export default function About() {
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  // Particle canvas — same as landing page
+  // Particle canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -249,17 +249,17 @@ export default function About() {
 
         .page-title {
           font-family: 'Playfair Display', serif; font-weight: 900;
-          font-size: clamp(42px, 7vw, 86px); line-height: 1.0; letter-spacing: -0.03em;
+          font-size: clamp(36px, 7vw, 86px); line-height: 1.0; letter-spacing: -0.03em;
           background: linear-gradient(130deg, #0d0b14 0%, #3b0764 22%, #7c3aed 46%, #c2357a 68%, #c9933a 88%);
           background-size: 260% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
           background-clip: text; animation: shimmerTitle 4.5s linear infinite, rgbShift 7s linear infinite;
         }
-        .section-h { font-family: 'Playfair Display', serif; font-weight: 900; font-size: clamp(28px,4.5vw,52px); letter-spacing: -0.03em; color: #0d0b14; line-height: 1.06; }
-        .body-text { font-size: clamp(15px,1.8vw,17px); font-weight: 400; color: rgba(13,11,20,0.68); line-height: 1.82; }
+        .section-h { font-family: 'Playfair Display', serif; font-weight: 900; font-size: clamp(24px,4.5vw,52px); letter-spacing: -0.03em; color: #0d0b14; line-height: 1.06; }
+        .body-text { font-size: clamp(14px,1.8vw,17px); font-weight: 400; color: rgba(13,11,20,0.68); line-height: 1.82; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .cinematic-line { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(124,92,191,0.45) 30%, rgba(194,53,122,0.55) 50%, rgba(124,92,191,0.45) 70%, transparent 100%); animation: scanGlow 9s ease-in-out infinite; }
 
-        .toc-link { display: block; padding: 10px 0; border-bottom: 1px solid rgba(13,11,20,0.07); font-size: 13px; font-weight: 500; color: rgba(13,11,20,0.55); text-decoration: none; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px; }
+        .toc-link { display: flex; padding: 10px 0; border-bottom: 1px solid rgba(13,11,20,0.07); font-size: 13px; font-weight: 500; color: rgba(13,11,20,0.55); text-decoration: none; transition: all 0.2s ease; align-items: center; gap: 10px; }
         .toc-link:hover { color: #7c5cbf; padding-left: 6px; }
         .toc-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(13,11,20,0.28); min-width: 24px; }
 
@@ -270,22 +270,81 @@ export default function About() {
 
         .pull-quote { border-left: 3px solid; padding: 22px 28px; border-radius: 0 14px 14px 0; margin: 36px 0; }
 
+        /* ── HERO SECTION MOBILE FIX ── */
+        .hero-section {
+          position: relative;
+          z-index: 1;
+          min-height: 100svh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 90px 20px 60px;
+          text-align: center;
+          overflow: hidden;
+        }
+
+        /* ── ORB MOBILE: hide large orbs, scale down ── */
+        .orb-container {
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          overflow: hidden;
+          pointer-events: none;
+        }
+
+        /* ── SECTION PADDING MOBILE FIX ── */
+        .sec-pad { padding: 56px 16px; }
+
+        /* ── DESKTOP NAV ── */
+        .nav-links-desk { display: flex; gap: 26px; align-items: center; }
+        .ham-btn { display: none !important; }
+
         @media (max-width: 900px) {
-          .nav-root { padding: 13px 20px !important; }
+          .nav-root { padding: 12px 16px !important; }
           .nav-links-desk { display: none !important; }
           .ham-btn { display: flex !important; }
           .two-col { grid-template-columns: 1fr !important; }
           .toc-grid { grid-template-columns: 1fr !important; }
-          .hero-pad { padding: 110px 20px 80px !important; }
-          .sec-pad { padding: 72px 20px !important; }
-          .contract-row { flex-direction: column !important; gap: 10px !important; align-items: flex-start !important; }
+          /* CRITICAL: tighter hero on mobile */
+          .hero-section {
+            padding: 80px 16px 50px !important;
+            min-height: 100svh !important;
+            justify-content: center !important;
+          }
+          .sec-pad { padding: 52px 16px !important; }
+          .contract-row { flex-direction: column !important; gap: 8px !important; align-items: flex-start !important; }
+          /* Reduce orb sizes on mobile via opacity only (can't resize fixed positioned divs easily) */
+          .orb-mobile-hide { display: none !important; }
         }
+
         @media (max-width: 600px) {
-          .nav-root { padding: 11px 14px !important; }
-          .inner { padding: 0 20px !important; }
-          .pull-quote { padding: 16px 18px; }
+          .nav-root { padding: 10px 14px !important; }
+          .pull-quote { padding: 14px 16px; }
           .tier-cards { grid-template-columns: 1fr !important; }
           .actions-grid { grid-template-columns: 1fr !important; }
+          .hero-section {
+            padding: 75px 16px 45px !important;
+          }
+          .page-title { font-size: clamp(32px, 9vw, 52px) !important; }
+          /* Hide scroll hint on very small screens */
+          .scroll-hint { display: none !important; }
+          /* Toc padding */
+          .toc-inner { padding: 24px 20px !important; }
+          /* Contract card padding */
+          .contract-card { padding: 22px 18px !important; }
+          /* Principle card */
+          .principle-card { padding: 20px 18px !important; }
+          /* Security item */
+          .security-item { padding: 14px 14px !important; }
+        }
+
+        /* Landscape mobile fix */
+        @media (max-height: 500px) and (max-width: 900px) {
+          .hero-section {
+            min-height: auto !important;
+            padding: 70px 16px 40px !important;
+          }
         }
       `}</style>
 
@@ -304,26 +363,32 @@ export default function About() {
         `,
       }} />
 
-      {/* Orbs */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        <Orb size={300} x="68%" y="-8%"  delay={0} dur={5} c1="rgba(251,200,228,0.85)" c2="rgba(192,175,251,0.7)"  c3="rgba(143,45,230,0.28)" />
-        <Orb size={200} x="-6%" y="6%"   delay={1} dur={4} c1="rgba(252,218,248,0.85)" c2="rgba(249,200,228,0.65)" c3="rgba(192,175,251,0.35)" />
-        <Orb size={150} x="62%" y="52%"  delay={2} dur={6} c1="rgba(254,246,190,0.85)" c2="rgba(252,218,172,0.65)" c3="rgba(242,152,5,0.22)"   />
-        <Orb size={250} x="5%"  y="62%"  delay={0} dur={5} c1="rgba(220,240,252,0.85)" c2="rgba(188,216,252,0.65)" c3="rgba(95,98,238,0.22)"   />
-        <Orb size={100} x="88%" y="70%"  delay={1} dur={4} c1="rgba(252,222,222,0.85)" c2="rgba(250,160,160,0.65)" c3="rgba(215,32,32,0.18)"   />
+      {/* Orbs — hidden on small mobile via class */}
+      <div className="orb-container">
+        {/* Large top-right orb — hidden on mobile */}
+        <div className="orb-mobile-hide">
+          <Orb size={280} x="68%" y="-8%"  delay={0} dur={5} c1="rgba(251,200,228,0.85)" c2="rgba(192,175,251,0.7)"  c3="rgba(143,45,230,0.28)" />
+        </div>
+        {/* Small top-left — keep but reduce via % sizing */}
+        <Orb size={160} x="-4%" y="4%"   delay={1} dur={4} c1="rgba(252,218,248,0.85)" c2="rgba(249,200,228,0.65)" c3="rgba(192,175,251,0.35)" />
+        <Orb size={120} x="65%" y="50%"  delay={2} dur={6} c1="rgba(254,246,190,0.85)" c2="rgba(252,218,172,0.65)" c3="rgba(242,152,5,0.22)"   />
+        <div className="orb-mobile-hide">
+          <Orb size={220} x="5%"  y="60%"  delay={0} dur={5} c1="rgba(220,240,252,0.85)" c2="rgba(188,216,252,0.65)" c3="rgba(95,98,238,0.22)"   />
+        </div>
+        <Orb size={90}  x="86%" y="68%"  delay={1} dur={4} c1="rgba(252,222,222,0.85)" c2="rgba(250,160,160,0.65)" c3="rgba(215,32,32,0.18)"   />
       </div>
 
       {/* ══════════ NAVBAR ══════════ */}
       <nav className={`nav-root${scrolled ? ' scrolled' : ''}`}>
-        <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 11, textDecoration: 'none' }}>
-          <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, boxShadow: '0 4px 14px rgba(124,58,237,0.32)' }}>◆</div>
+        <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, boxShadow: '0 4px 14px rgba(124,58,237,0.32)', flexShrink: 0 }}>◆</div>
           <div>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 17, color: '#0d0b14', letterSpacing: '0.04em', lineHeight: 1 }}>RST<span style={{ color: '#c2357a' }}>.</span></div>
+            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16, color: '#0d0b14', letterSpacing: '0.04em', lineHeight: 1 }}>RST<span style={{ color: '#c2357a' }}>.</span></div>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 7, color: 'rgba(13,11,20,0.38)', letterSpacing: '0.22em', marginTop: 1 }}>PROTOCOL</div>
           </div>
         </a>
 
-        <div className="nav-links-desk" style={{ display: 'flex', gap: 26, alignItems: 'center' }}>
+        <div className="nav-links-desk">
           {['Overview', 'Architecture', 'Tiers', 'Actions', 'Security'].map(l => (
             <a key={l} href={`#${l.toLowerCase()}`} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10.5, color: 'rgba(13,11,20,0.5)', textDecoration: 'none', letterSpacing: '0.13em', transition: 'color 0.2s', textTransform: 'uppercase' as const }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#7c5cbf'}
@@ -337,8 +402,10 @@ export default function About() {
           >← Back to App</a>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* GitHub — hidden on small mobile to save space */}
           <a href="https://github.com/NexTechArchitect/RST-Reputation-Protocol" target="_blank" rel="noopener noreferrer"
+            className="orb-mobile-hide"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: 'rgba(13,11,20,0.55)', textDecoration: 'none', transition: 'all 0.2s ease', letterSpacing: '0.07em' }}
             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(124,92,191,0.1)'; el.style.color = '#7c5cbf'; }}
             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(13,11,20,0.06)'; el.style.color = 'rgba(13,11,20,0.55)'; }}>
@@ -347,7 +414,7 @@ export default function About() {
           </a>
 
           <button onClick={() => setMenuOpen(!menuOpen)} className="ham-btn" aria-label="Toggle menu"
-            style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: 6, flexDirection: 'column' as const, gap: 5 }}>
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, flexDirection: 'column' as const, gap: 5, alignItems: 'center', justifyContent: 'center' }}>
             {[0,1,2].map(i => (
               <div key={i} style={{ width: 22, height: 1.5, background: '#0d0b14', borderRadius: 2, transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', transform: menuOpen ? (i===0?'rotate(45deg) translate(4.5px,4.5px)':i===1?'scaleX(0)':'rotate(-45deg) translate(4.5px,-4.5px)') : 'none', opacity: menuOpen && i===1 ? 0 : 1 }} />
             ))}
@@ -356,44 +423,52 @@ export default function About() {
       </nav>
 
       {/* Mobile menu */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 890, background: '#fdfbff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 32, opacity: menuOpen ? 1 : 0, pointerEvents: menuOpen ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 890, background: '#fdfbff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 28, opacity: menuOpen ? 1 : 0, pointerEvents: menuOpen ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
         {['Overview', 'Architecture', 'Tiers', 'Actions', 'Security', '← App'].map((item, i) => (
           <a key={item} href={item === '← App' ? '/' : `#${item.toLowerCase()}`} onClick={() => setMenuOpen(false)}
-            style={{ fontFamily: "'Playfair Display',serif", fontSize: 36, fontWeight: 700, color: '#0d0b14', textDecoration: 'none', opacity: menuOpen ? 1 : 0, transform: menuOpen ? 'none' : 'translateY(16px)', transition: `all 0.44s cubic-bezier(0.16,1,0.3,1) ${i * 50}ms` }}
+            style={{ fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 700, color: '#0d0b14', textDecoration: 'none', opacity: menuOpen ? 1 : 0, transform: menuOpen ? 'none' : 'translateY(16px)', transition: `all 0.44s cubic-bezier(0.16,1,0.3,1) ${i * 50}ms` }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#c2357a'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#0d0b14'}
           >{item}</a>
         ))}
+        {/* GitHub link in mobile menu */}
+        <a href="https://github.com/NexTechArchitect/RST-Reputation-Protocol" target="_blank" rel="noopener noreferrer"
+          onClick={() => setMenuOpen(false)}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '10px 20px', borderRadius: 10, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: 'rgba(13,11,20,0.6)', textDecoration: 'none', opacity: menuOpen ? 1 : 0, transition: `all 0.44s cubic-bezier(0.16,1,0.3,1) 300ms` }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
       </div>
 
       {/* ══════════ HERO ══════════ */}
-      <section className="hero-pad" style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '130px 32px 90px', textAlign: 'center', overflow: 'hidden' }}>
+      {/* KEY FIX: removed minHeight 100vh inline, use className instead; tightened padding */}
+      <section className="hero-section">
         <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }}><RibbonLayer /></div>
         <div className="cinematic-line" style={{ top: '28%', zIndex: 2 }} />
 
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: 820 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '7px 20px', borderRadius: 100, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,92,191,0.2)', fontSize: 10, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.6)', letterSpacing: '0.13em', marginBottom: 30, animation: 'heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both, badgeShimmer 4s ease-in-out infinite', boxShadow: '0 2px 12px rgba(124,92,191,0.1)' }}>
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 820, width: '100%' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '7px 16px', borderRadius: 100, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,92,191,0.2)', fontSize: 9, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.6)', letterSpacing: '0.12em', marginBottom: 24, animation: 'heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both, badgeShimmer 4s ease-in-out infinite', boxShadow: '0 2px 12px rgba(124,92,191,0.1)', maxWidth: '90vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981', animation: 'liveDot 2s ease-in-out infinite', flexShrink: 0 }} />
             PROJECT DOCUMENTATION · RST PROTOCOL
           </div>
 
-          <h1 className="page-title" style={{ marginBottom: 26, animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both' }}>
+          <h1 className="page-title" style={{ marginBottom: 20, animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both' }}>
             What is the RST<br />Protocol?
           </h1>
 
-          <p className="body-text" style={{ maxWidth: 560, margin: '0 auto 38px', animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s both' }}>
+          <p className="body-text" style={{ maxWidth: 540, margin: '0 auto 32px', animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s both', padding: '0 4px' }}>
             A fully on-chain reputation system that assigns every Ethereum wallet a permanent, non-transferable identity token — one that evolves as the wallet behaves. No servers. No databases. No IPFS. Just Solidity, storage, and truth.
           </p>
 
           {/* Jump links */}
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.28s both' }}>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.28s both', padding: '0 4px' }}>
             {[
               { l: 'Overview', href: '#overview', c: '#7c3aed' },
               { l: 'Architecture', href: '#architecture', c: '#3b82f6' },
               { l: 'Tiers', href: '#tiers', c: '#c9933a' },
               { l: 'Security', href: '#security', c: '#e11d7a' },
             ].map(link => (
-              <a key={link.l} href={link.href} style={{ padding: '9px 18px', borderRadius: 10, background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(13,11,20,0.1)', fontSize: 12, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.62)', textDecoration: 'none', letterSpacing: '0.08em', transition: 'all 0.22s ease' }}
+              <a key={link.l} href={link.href} style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(13,11,20,0.1)', fontSize: 11, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.62)', textDecoration: 'none', letterSpacing: '0.08em', transition: 'all 0.22s ease' }}
                 onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.color = link.c; el.style.borderColor = `${link.c}40`; el.style.background = 'rgba(255,255,255,0.96)'; }}
                 onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.color = 'rgba(13,11,20,0.62)'; el.style.borderColor = 'rgba(13,11,20,0.1)'; el.style.background = 'rgba(255,255,255,0.82)'; }}
               >{link.l}</a>
@@ -401,18 +476,19 @@ export default function About() {
           </div>
         </div>
 
-        <div style={{ position: 'absolute', bottom: 32, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, animation: 'scrollHint 2.2s ease-in-out infinite' }}>
+        {/* Scroll hint — hidden on small screens via class */}
+        <div className="scroll-hint" style={{ position: 'absolute', bottom: 24, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, animation: 'scrollHint 2.2s ease-in-out infinite' }}>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: 'rgba(13,11,20,0.32)', letterSpacing: '0.22em' }}>SCROLL TO READ</div>
-          <div style={{ width: 1, height: 26, background: 'linear-gradient(to bottom, rgba(124,92,191,0.5), transparent)' }} />
+          <div style={{ width: 1, height: 22, background: 'linear-gradient(to bottom, rgba(124,92,191,0.5), transparent)' }} />
         </div>
       </section>
 
       {/* ══════════ TABLE OF CONTENTS ══════════ */}
-      <Section id="toc" style={{ padding: '0 32px 80px' }}>
+      <Section id="toc" style={{ padding: '0 16px 56px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div id="toc-block" data-reveal style={{ padding: '40px 44px', borderRadius: 22, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,92,191,0.12)', boxShadow: '0 8px 36px rgba(13,11,20,0.06)', ...rv('toc-block') }}>
-            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '0.22em', color: 'rgba(13,11,20,0.38)', marginBottom: 20, textTransform: 'uppercase' as const }}>Contents</div>
-            <div className="toc-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 48px' }}>
+          <div id="toc-block" data-reveal className="toc-inner" style={{ padding: '32px 36px', borderRadius: 20, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,92,191,0.12)', boxShadow: '0 8px 36px rgba(13,11,20,0.06)', ...rv('toc-block') }}>
+            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '0.22em', color: 'rgba(13,11,20,0.38)', marginBottom: 18, textTransform: 'uppercase' as const }}>Contents</div>
+            <div className="toc-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 40px' }}>
               {[
                 ['01', 'The Problem', '#overview'],
                 ['02', 'How It Works', '#how-it-works'],
@@ -436,27 +512,24 @@ export default function About() {
       </Section>
 
       {/* ══════════ OVERVIEW — THE PROBLEM ══════════ */}
-      <Section id="overview" style={{ padding: '80px 32px' }}>
+   <Section id="overview" style={{ padding: '56px 16px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div id="ov-hdr" data-reveal style={rv('ov-hdr')}>
-            <h2 className="section-h" style={{ marginBottom: 28 }}>On-chain identity is broken.</h2>
+            <h2 className="section-h" style={{ marginBottom: 24 }}>On-chain identity is broken.</h2>
           </div>
-
           <div id="ov-body" data-reveal style={{ ...rv('ov-body', 100) }}>
-            <p className="body-text" style={{ marginBottom: 24 }}>
+            <p className="body-text" style={{ marginBottom: 20 }}>
               Every Ethereum wallet looks the same to a smart contract. A DeFi power user who has voted in dozens of governance proposals, repaid multiple loans, and held through three market cycles is indistinguishable — at the protocol level — from a wallet created five minutes ago with a single ETH transfer.
             </p>
-            <p className="body-text" style={{ marginBottom: 24 }}>
+            <p className="body-text" style={{ marginBottom: 20 }}>
               This creates a fundamental problem for any protocol that wants to reward trust, extend credit, or weight governance influence. Without persistent, verifiable on-chain identity, every system defaults to treating wallets as anonymous and equal — which they are not.
             </p>
-
             <div className="pull-quote" style={{ borderColor: '#7c3aed22', background: 'rgba(124,58,237,0.04)' }}>
-              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(17px,2.2vw,21px)', fontWeight: 700, color: '#3b0764', lineHeight: 1.55, fontStyle: 'italic' }}>
+              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(15px,2.2vw,21px)', fontWeight: 700, color: '#3b0764', lineHeight: 1.55, fontStyle: 'italic' }}>
                 "The RST Protocol solves this. Not with a centralised score, not with a KYC provider, not with a social graph — but with raw on-chain behaviour, permanently recorded and cryptographically verified."
               </p>
             </div>
-
-            <p className="body-text" style={{ marginBottom: 24 }}>
+            <p className="body-text" style={{ marginBottom: 20 }}>
               When a wallet interacts with the RST Protocol, every action they take — every vote cast, every loan repaid, every airdrop held — is permanently written to the blockchain and translated into a numeric reputation score between 0 and 1000. That score determines their tier. Their tier determines their power in any protocol that integrates RST.
             </p>
             <p className="body-text">
@@ -467,25 +540,23 @@ export default function About() {
       </Section>
 
       {/* ══════════ HOW IT WORKS ══════════ */}
-      <Section id="how-it-works" style={{ padding: '80px 32px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
+      <Section id="how-it-works" style={{ padding: '56px 16px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div id="hiw-hdr" data-reveal style={{ marginBottom: 56, ...rv('hiw-hdr') }}>
- 
+          <div id="hiw-hdr" data-reveal style={{ marginBottom: 40, ...rv('hiw-hdr') }}>
             <h2 className="section-h">Four steps. One identity.</h2>
           </div>
-
-          <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+          <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
             {[
               { step: '01', title: 'You connect your wallet', c: '#7c3aed', body: 'Nothing is minted immediately. Your wallet exists in an Unranked state — a score of zero, no token. The protocol is aware of you, but your on-chain story has not yet begun.' },
-              { step: '02', title: 'You take your first action', c: '#3b82f6', body: 'The moment you cast a vote, repay a loan, or perform any tracked action through the ReputationVault, two things happen at once: your score is updated, and if you do not already have a Soulbound Token, one is issued to your wallet automatically. No separate mint transaction required.' },
-              { step: '03', title: 'Your score accumulates', c: '#10b981', body: 'Every subsequent action modifies your score upward or downward. The scoring is bounded between 0 and 1000 — you can never overflow into negative territory, and you can never exceed the maximum. Your score reflects a lifetime of on-chain behaviour, not just your most recent transaction.' },
-              { step: '04', title: 'Your medal upgrades automatically', c: '#c9933a', body: 'As your score crosses tier thresholds — 100 for Bronze, 300 for Silver, 600 for Gold, 850 for Platinum — the artwork displayed by your Soulbound Token changes on the fly. No re-minting. No gas cost. The contract reads your current score and generates the correct medal every time your token is viewed.' },
+              { step: '02', title: 'You take your first action', c: '#3b82f6', body: 'The moment you cast a vote, repay a loan, or perform any tracked action through the ReputationVault, two things happen at once: your score is updated, and if you do not already have a Soulbound Token, one is issued to your wallet automatically.' },
+              { step: '03', title: 'Your score accumulates', c: '#10b981', body: 'Every subsequent action modifies your score upward or downward. The scoring is bounded between 0 and 1000. Your score reflects a lifetime of on-chain behaviour, not just your most recent transaction.' },
+              { step: '04', title: 'Your medal upgrades automatically', c: '#c9933a', body: 'As your score crosses tier thresholds — 100 for Bronze, 300 for Silver, 600 for Gold, 850 for Platinum — the artwork displayed by your Soulbound Token changes on the fly. No re-minting. No gas cost.' },
             ].map((item, i) => (
-              <div key={item.step} id={`hiw${i}`} data-reveal style={{ padding: '28px 26px', borderRadius: 18, background: 'rgba(255,255,255,0.88)', border: `1px solid ${item.c}18`, position: 'relative', overflow: 'hidden', ...rv(`hiw${i}`, i * 80) }}>
-                <div style={{ position: 'absolute', bottom: -12, right: 8, fontFamily: "'Playfair Display',serif", fontSize: 88, fontWeight: 900, color: `${item.c}07`, lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>{item.step}</div>
-                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: item.c, letterSpacing: '0.16em', marginBottom: 12, fontWeight: 600 }}>STEP {item.step}</div>
-                <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(17px,2vw,21px)', color: '#0d0b14', marginBottom: 14, lineHeight: 1.2 }}>{item.title}</h3>
-                <p style={{ fontSize: 14, fontWeight: 400, color: 'rgba(13,11,20,0.64)', lineHeight: 1.75 }}>{item.body}</p>
+              <div key={item.step} id={`hiw${i}`} data-reveal style={{ padding: '22px 20px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: `1px solid ${item.c}18`, position: 'relative', overflow: 'hidden', ...rv(`hiw${i}`, i * 80) }}>
+                <div style={{ position: 'absolute', bottom: -12, right: 8, fontFamily: "'Playfair Display',serif", fontSize: 72, fontWeight: 900, color: `${item.c}07`, lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>{item.step}</div>
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: item.c, letterSpacing: '0.16em', marginBottom: 10, fontWeight: 600 }}>STEP {item.step}</div>
+                <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(15px,2vw,20px)', color: '#0d0b14', marginBottom: 12, lineHeight: 1.2 }}>{item.title}</h3>
+                <p style={{ fontSize: 13, fontWeight: 400, color: 'rgba(13,11,20,0.64)', lineHeight: 1.72 }}>{item.body}</p>
               </div>
             ))}
           </div>
@@ -493,38 +564,36 @@ export default function About() {
       </Section>
 
       {/* ══════════ ARCHITECTURE ══════════ */}
-      <Section id="architecture" style={{ padding: '80px 32px' }}>
+      <Section id="architecture" style={{ padding: '56px 16px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div id="arch-hdr" data-reveal style={rv('arch-hdr')}>
-        
-            <h2 className="section-h" style={{ marginBottom: 28 }}>Separation of concerns, taken seriously.</h2>
+            <h2 className="section-h" style={{ marginBottom: 24 }}>Separation of concerns, taken seriously.</h2>
           </div>
           <div id="arch-body" data-reveal style={{ ...rv('arch-body', 90) }}>
-            <p className="body-text" style={{ marginBottom: 24 }}>
+            <p className="body-text" style={{ marginBottom: 20 }}>
               The RST Protocol is composed of three independent smart contracts, each with a single, clearly defined responsibility. This separation is not just a design preference — it is a security requirement.
             </p>
-            <p className="body-text" style={{ marginBottom: 24 }}>
-              The most important design decision in the entire system is the split between the token layer and the engine layer. The token — which holds the permanent record of who owns which Soulbound Token — is completely immutable. It cannot be upgraded, modified, or extended after deployment. This is intentional. SBT ownership is ground truth. If the token were upgradeable, a compromised protocol owner could silently reassign tokens, remove the transfer lock, or erase ownership records.
+            <p className="body-text" style={{ marginBottom: 20 }}>
+              The most important design decision in the entire system is the split between the token layer and the engine layer. The token — which holds the permanent record of who owns which Soulbound Token — is completely immutable. It cannot be upgraded, modified, or extended after deployment.
             </p>
-            <p className="body-text" style={{ marginBottom: 32 }}>
-              The engine — which calculates scores, resolves tiers, and decides when to issue tokens — is upgradeable via the UUPS proxy pattern. Scoring logic is not ground truth. It is policy, and policy must be allowed to evolve. As new action types are added, as tier thresholds are recalibrated, as the protocol grows, the engine can be upgraded without touching a single token record.
+            <p className="body-text" style={{ marginBottom: 28 }}>
+              The engine — which calculates scores, resolves tiers, and decides when to issue tokens — is upgradeable via the UUPS proxy pattern. Scoring logic is not ground truth. It is policy, and policy must be allowed to evolve.
             </p>
-
-            {/* Architecture diagram — text-based, elegant */}
-            <div style={{ padding: '32px 36px', borderRadius: 18, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(13,11,20,0.08)', fontFamily: "'JetBrains Mono',monospace", fontSize: 12, lineHeight: 2.0 }}>
-              <div style={{ color: 'rgba(13,11,20,0.4)', fontSize: 9, letterSpacing: '0.16em', marginBottom: 18 }}>SYSTEM LAYERS · TOP TO BOTTOM</div>
+            {/* Architecture diagram */}
+            <div style={{ padding: '24px 20px', borderRadius: 16, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(13,11,20,0.08)', fontFamily: "'JetBrains Mono',monospace", fontSize: 11, lineHeight: 2.0, overflowX: 'auto' }}>
+              <div style={{ color: 'rgba(13,11,20,0.4)', fontSize: 8, letterSpacing: '0.16em', marginBottom: 14 }}>SYSTEM LAYERS · TOP TO BOTTOM</div>
               {[
                 { label: 'USER / DAPP', sub: 'Wagmi v2 · Viem · RainbowKit', c: '#7c5cbf', arrow: true },
                 { label: 'REPUTATION VAULT', sub: 'castVote() · takeLoan() · claimAirdrop() · mintNFT()', c: '#10b981', arrow: true },
                 { label: 'REPUTATION ENGINE', sub: 'Score calculation · Tier resolution · SBT auto-issuance', c: '#3b82f6', arrow: true },
                 { label: 'REPUTATION TOKEN', sub: 'ERC-5484 Soulbound · On-chain SVG · Immutable ownership', c: '#e11d7a', arrow: false },
-              ].map((layer, i) => (
+              ].map((layer) => (
                 <div key={layer.label}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '12px 16px', borderRadius: 10, background: `${layer.c}08`, border: `1px solid ${layer.c}18` }}>
-                    <span style={{ color: layer.c, fontWeight: 600, fontSize: 11, letterSpacing: '0.08em', minWidth: 180, flexShrink: 0 }}>{layer.label}</span>
-                    <span style={{ color: 'rgba(13,11,20,0.48)', fontSize: 11 }}>{layer.sub}</span>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 14px', borderRadius: 10, background: `${layer.c}08`, border: `1px solid ${layer.c}18`, flexWrap: 'wrap' }}>
+                    <span style={{ color: layer.c, fontWeight: 600, fontSize: 10, letterSpacing: '0.08em', minWidth: 160, flexShrink: 0 }}>{layer.label}</span>
+                    <span style={{ color: 'rgba(13,11,20,0.48)', fontSize: 10 }}>{layer.sub}</span>
                   </div>
-                  {layer.arrow && <div style={{ textAlign: 'center', color: 'rgba(13,11,20,0.22)', fontSize: 16, margin: '2px 0' }}>↓</div>}
+                  {layer.arrow && <div style={{ textAlign: 'center', color: 'rgba(13,11,20,0.22)', fontSize: 14, margin: '2px 0' }}>↓</div>}
                 </div>
               ))}
             </div>
@@ -533,52 +602,50 @@ export default function About() {
       </Section>
 
       {/* ══════════ THE THREE CONTRACTS ══════════ */}
-      <Section id="contracts" style={{ padding: '80px 32px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
+      <Section id="contracts" style={{ padding: '56px 16px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div id="con-hdr" data-reveal style={{ marginBottom: 56, ...rv('con-hdr') }}>
-           
+          <div id="con-hdr" data-reveal style={{ marginBottom: 40, ...rv('con-hdr') }}>
             <h2 className="section-h">Three contracts. One identity.</h2>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {[
               {
                 ...CONTRACTS[0],
                 heading: 'The soul of the system',
-                body: `ReputationToken is where permanent records live. Every wallet's Soulbound Token ownership is stored here, and this contract will never change. It enforces the ERC-5484 standard — which means it fires the correct Issued event with burn authorisation details when a token is created, registers its own interface ID so other contracts can detect it, and absolutely refuses to allow any token transfer between wallets. The transfer lock is enforced at the lowest possible level inside OpenZeppelin's ERC-721 base, meaning no present or future code path can bypass it. The token counter starts at one, reserving zero as a sentinel value meaning "this wallet has no token." Token IDs are never reused — if a token is burned, its ID is retired permanently.`,
+                body: `ReputationToken is where permanent records live. Every wallet's Soulbound Token ownership is stored here, and this contract will never change. It enforces the ERC-5484 standard — which means it fires the correct Issued event with burn authorisation details when a token is created, registers its own interface ID so other contracts can detect it, and absolutely refuses to allow any token transfer between wallets. The transfer lock is enforced at the lowest possible level inside OpenZeppelin's ERC-721 base, meaning no present or future code path can bypass it.`,
                 detail: 'The token contract can only be controlled by the engine address, which is set exactly once after deployment and can never be changed again. This engine lock means even if the owner\'s private key were compromised, the token records themselves are fully protected.',
               },
               {
                 ...CONTRACTS[1],
                 heading: 'The brain of the system',
-                body: `ReputationEngine is where intelligence lives. It receives action signals from authorised callers — primarily the ReputationVault — and updates scores accordingly. The engine uses a pure math library called ReputationMath to calculate score changes. This library has no state, no external calls, and therefore zero reentrancy surface. Every score delta is routed through an Action enum rather than raw signed integers, which prevents callers from injecting arbitrary score changes. The engine is deployed behind a UUPS proxy, meaning its logic can be upgraded while the proxy address — and therefore all integrations pointing at it — remain unchanged. A 45-slot storage gap reserves space for future variable additions without storage collision.`,
+                body: `ReputationEngine is where intelligence lives. It receives action signals from authorised callers — primarily the ReputationVault — and updates scores accordingly. The engine uses a pure math library called ReputationMath to calculate score changes. Every score delta is routed through an Action enum rather than raw signed integers, which prevents callers from injecting arbitrary score changes. The engine is deployed behind a UUPS proxy, meaning its logic can be upgraded while the proxy address remains unchanged.`,
                 detail: 'The engine is responsible for one automatic behaviour that happens on every first action: if the acting wallet does not yet have a Soulbound Token, it calls the token contract to issue one. This removes any separate minting step for the user.',
               },
               {
                 ...CONTRACTS[2],
                 heading: 'The gateway of the system',
-                body: `ReputationVault is the user-facing entry point. It is the contract that humans and frontends interact with directly. It simulates the kinds of actions that real DeFi protocols would perform — DAO governance, lending, airdrop mechanics, NFT minting — and records each one to the engine. In a production deployment, each real protocol would call the engine directly. The Vault bundles all of these action types into a single contract for demonstration and testing purposes. Cooldowns are enforced per action type: voting and NFT minting have 12-hour cooldowns, proposal submission has a 24-hour cooldown, loan and airdrop actions are gated by natural state rather than time.`,
-                detail: 'The airdrop mechanic is particularly deliberate: claiming an airdrop starts a timer, and settling it before 30 days have passed penalises the wallet with −20 points. Settling after 30 days rewards it with +15. This distinguishes genuine participants from airdrop farmers at a protocol level.',
+                body: `ReputationVault is the user-facing entry point. It simulates the kinds of actions that real DeFi protocols would perform — DAO governance, lending, airdrop mechanics, NFT minting — and records each one to the engine. Cooldowns are enforced per action type: voting and NFT minting have 12-hour cooldowns, proposal submission has a 24-hour cooldown, loan and airdrop actions are gated by natural state rather than time.`,
+                detail: 'The airdrop mechanic is particularly deliberate: claiming an airdrop starts a timer, and settling it before 30 days have passed penalises the wallet with −20 points. Settling after 30 days rewards it with +15.',
               },
             ].map((c, i) => (
-              <div key={c.name} id={`ccard${i}`} data-reveal style={{ padding: '36px 38px', borderRadius: 20, background: 'rgba(255,255,255,0.9)', border: `1px solid ${c.c}18`, overflow: 'hidden', position: 'relative', ...rv(`ccard${i}`, i * 90) }}>
-                <div style={{ position: 'absolute', top: -20, right: -10, fontFamily: "'Playfair Display',serif", fontSize: 110, fontWeight: 900, color: `${c.c}06`, lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>{c.num}</div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, marginBottom: 22, flexWrap: 'wrap' }}>
+              <div key={c.name} id={`ccard${i}`} data-reveal className="contract-card" style={{ padding: '28px 24px', borderRadius: 18, background: 'rgba(255,255,255,0.9)', border: `1px solid ${c.c}18`, overflow: 'hidden', position: 'relative', ...rv(`ccard${i}`, i * 90) }}>
+                <div style={{ position: 'absolute', top: -16, right: -8, fontFamily: "'Playfair Display',serif", fontSize: 90, fontWeight: 900, color: `${c.c}06`, lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>{c.num}</div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 18, flexWrap: 'wrap' }}>
                   <div>
-                    <div className="contract-row" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 22 }}>{c.icon}</span>
-                      <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 'clamp(20px,2.5vw,26px)', color: '#0d0b14', letterSpacing: '-0.02em', lineHeight: 1 }}>{c.name}</h3>
-                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, fontWeight: 600, color: c.c, padding: '4px 10px', borderRadius: 7, background: `${c.c}10`, border: `1px solid ${c.c}22`, letterSpacing: '0.07em' }}>{c.tag}</span>
+                    <div className="contract-row" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 20 }}>{c.icon}</span>
+                      <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 'clamp(18px,2.5vw,24px)', color: '#0d0b14', letterSpacing: '-0.02em', lineHeight: 1 }}>{c.name}</h3>
+                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 600, color: c.c, padding: '3px 8px', borderRadius: 6, background: `${c.c}10`, border: `1px solid ${c.c}22`, letterSpacing: '0.07em' }}>{c.tag}</span>
                     </div>
-                    <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(14px,1.6vw,17px)', fontStyle: 'italic', color: 'rgba(13,11,20,0.48)', marginBottom: 0 }}>{c.heading}</div>
+                    <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(13px,1.6vw,16px)', fontStyle: 'italic', color: 'rgba(13,11,20,0.48)' }}>{c.heading}</div>
                   </div>
                 </div>
-                <p style={{ fontSize: 'clamp(14px,1.5vw,15.5px)', fontWeight: 400, color: 'rgba(13,11,20,0.66)', lineHeight: 1.82, marginBottom: 18 }}>{c.body}</p>
-                <div style={{ padding: '14px 18px', borderRadius: 11, background: `${c.c}06`, border: `1px solid ${c.c}14`, marginBottom: 22 }}>
-                  <p style={{ fontSize: 13.5, fontWeight: 400, color: 'rgba(13,11,20,0.58)', lineHeight: 1.72 }}>{c.detail}</p>
+                <p style={{ fontSize: 'clamp(13px,1.5vw,15px)', fontWeight: 400, color: 'rgba(13,11,20,0.66)', lineHeight: 1.78, marginBottom: 16 }}>{c.body}</p>
+                <div style={{ padding: '12px 16px', borderRadius: 10, background: `${c.c}06`, border: `1px solid ${c.c}14`, marginBottom: 18 }}>
+                  <p style={{ fontSize: 13, fontWeight: 400, color: 'rgba(13,11,20,0.58)', lineHeight: 1.7 }}>{c.detail}</p>
                 </div>
                 <a href={c.etherscan} target="_blank" rel="noopener noreferrer" className="contract-chip"
-                  style={{ background: `${c.c}0e`, border: `1px solid ${c.c}28`, color: c.c }}
+                  style={{ background: `${c.c}0e`, border: `1px solid ${c.c}28`, color: c.c, flexWrap: 'wrap' as const }}
                   onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${c.c}1e`}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = `${c.c}0e`}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -591,41 +658,38 @@ export default function About() {
       </Section>
 
       {/* ══════════ TIERS ══════════ */}
-      <Section id="tiers" style={{ padding: '80px 32px' }}>
+      <Section id="tiers" style={{ padding: '56px 16px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div id="tier-hdr" data-reveal style={{ marginBottom: 52, ...rv('tier-hdr') }}>
-          
+          <div id="tier-hdr" data-reveal style={{ marginBottom: 36, ...rv('tier-hdr') }}>
             <h2 className="section-h">Five levels of trust.</h2>
-            <p style={{ fontSize: 16, color: 'rgba(13,11,20,0.58)', marginTop: 14, maxWidth: 520, lineHeight: 1.76 }}>
+            <p style={{ fontSize: 'clamp(14px,1.6vw,16px)', color: 'rgba(13,11,20,0.58)', marginTop: 12, maxWidth: 520, lineHeight: 1.72 }}>
               Your score places you in exactly one tier at any given time. Tiers determine two concrete privileges: how much your vote counts in governance, and how large an undercollateralised loan you can access.
             </p>
           </div>
-
-          <div className="tier-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+          <div className="tier-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
             {TIERS.map((t, i) => (
-              <div key={t.name} id={`tier${i}`} data-reveal style={{ padding: '26px 24px', borderRadius: 18, background: 'rgba(255,255,255,0.88)', border: `1.5px solid ${t.c}22`, ...rv(`tier${i}`, i * 75) }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 16 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 13, background: `${t.c}12`, border: `1.5px solid ${t.c}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21, flexShrink: 0 }}>{t.icon}</div>
+              <div key={t.name} id={`tier${i}`} data-reveal style={{ padding: '22px 20px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: `1.5px solid ${t.c}22`, ...rv(`tier${i}`, i * 75) }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 12, background: `${t.c}12`, border: `1.5px solid ${t.c}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{t.icon}</div>
                   <div>
-                    <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 20, color: t.c, letterSpacing: '-0.01em', lineHeight: 1 }}>{t.name}</div>
-                    <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, color: 'rgba(13,11,20,0.4)', marginTop: 3 }}>Score {t.range}</div>
+                    <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 19, color: t.c, letterSpacing: '-0.01em', lineHeight: 1 }}>{t.name}</div>
+                    <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: 'rgba(13,11,20,0.4)', marginTop: 3 }}>Score {t.range}</div>
                   </div>
                 </div>
-                <p style={{ fontSize: 13, color: 'rgba(13,11,20,0.6)', lineHeight: 1.72, marginBottom: 18 }}>{t.medal}</p>
+                <p style={{ fontSize: 12.5, color: 'rgba(13,11,20,0.6)', lineHeight: 1.68, marginBottom: 16 }}>{t.medal}</p>
                 <div style={{ display: 'flex', gap: 8 }}>
                   {[{ l: 'Voting', v: t.voting }, { l: 'Loan Cap', v: t.loan }].map(s => (
-                    <div key={s.l} style={{ flex: 1, padding: '9px 10px', borderRadius: 10, background: `${t.c}09`, border: `1px solid ${t.c}1e`, textAlign: 'center' as const }}>
-                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8.5, color: 'rgba(13,11,20,0.4)', letterSpacing: '0.1em', marginBottom: 4 }}>{s.l}</div>
-                      <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 20, color: t.c }}>{s.v}</div>
+                    <div key={s.l} style={{ flex: 1, padding: '8px 8px', borderRadius: 9, background: `${t.c}09`, border: `1px solid ${t.c}1e`, textAlign: 'center' as const }}>
+                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: 'rgba(13,11,20,0.4)', letterSpacing: '0.1em', marginBottom: 4 }}>{s.l}</div>
+                      <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 18, color: t.c }}>{s.v}</div>
                     </div>
                   ))}
                 </div>
               </div>
             ))}
           </div>
-
-          <div id="tier-note" data-reveal style={{ marginTop: 28, padding: '20px 26px', borderRadius: 14, background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(13,11,20,0.07)', ...rv('tier-note', 200) }}>
-            <p style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.46)', letterSpacing: '0.04em', lineHeight: 1.7 }}>
+          <div id="tier-note" data-reveal style={{ marginTop: 22, padding: '16px 20px', borderRadius: 12, background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(13,11,20,0.07)', ...rv('tier-note', 200) }}>
+            <p style={{ fontSize: 12, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.46)', letterSpacing: '0.04em', lineHeight: 1.7 }}>
               Note: there is an intentional asymmetry between voting and borrowing. Even Unranked wallets retain a 0.5× voting multiplier — governance participation is always open. But Unranked wallets have zero access to undercollateralised credit. Borrowing requires demonstrated trust. Voting does not.
             </p>
           </div>
@@ -633,29 +697,27 @@ export default function About() {
       </Section>
 
       {/* ══════════ ACTIONS ══════════ */}
-      <Section id="actions" style={{ padding: '80px 32px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
+      <Section id="actions" style={{ padding: '56px 16px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          <div id="act-hdr" data-reveal style={{ marginBottom: 52, ...rv('act-hdr') }}>
-     
+          <div id="act-hdr" data-reveal style={{ marginBottom: 36, ...rv('act-hdr') }}>
             <h2 className="section-h">What you do. What it costs. What it earns.</h2>
-            <p style={{ fontSize: 16, color: 'rgba(13,11,20,0.58)', marginTop: 14, lineHeight: 1.76 }}>
+            <p style={{ fontSize: 'clamp(14px,1.6vw,16px)', color: 'rgba(13,11,20,0.58)', marginTop: 12, lineHeight: 1.72 }}>
               Every action maps to a signed score delta. Positive actions build your reputation. Negative actions erode it. There is no undo, no appeal, and no reset.
             </p>
           </div>
-
           <div className="actions-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
             {ACTIONS.map((a, i) => (
-              <div key={a.name} id={`act${i}`} data-reveal style={{ padding: '18px 22px', borderRadius: 14, background: 'rgba(255,255,255,0.85)', border: `1px solid ${a.c}18`, ...rv(`act${i}`, i * 60) }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: `${a.c}10`, border: `1.5px solid ${a.c}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: a.c }}>
+              <div key={a.name} id={`act${i}`} data-reveal style={{ padding: '16px 18px', borderRadius: 13, background: 'rgba(255,255,255,0.85)', border: `1px solid ${a.c}18`, ...rv(`act${i}`, i * 60) }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 11, flexShrink: 0, background: `${a.c}10`, border: `1.5px solid ${a.c}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, color: a.c }}>
                     {a.icon}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 6, flexWrap: 'wrap' as const }}>
-                      <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 14.5, fontWeight: 700, color: '#0d0b14' }}>{a.name}</span>
-                      <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 19, color: a.pos ? '#0d9660' : '#ef4444', background: a.pos ? 'rgba(13,150,96,0.08)' : 'rgba(239,68,68,0.08)', padding: '3px 11px', borderRadius: 8, flexShrink: 0 }}>{a.delta}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 5, flexWrap: 'wrap' as const }}>
+                      <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 14, fontWeight: 700, color: '#0d0b14' }}>{a.name}</span>
+                      <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 18, color: a.pos ? '#0d9660' : '#ef4444', background: a.pos ? 'rgba(13,150,96,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 10px', borderRadius: 7, flexShrink: 0 }}>{a.delta}</span>
                     </div>
-                    <p style={{ fontSize: 13, color: 'rgba(13,11,20,0.55)', lineHeight: 1.68 }}>{a.why}</p>
+                    <p style={{ fontSize: 12.5, color: 'rgba(13,11,20,0.55)', lineHeight: 1.65 }}>{a.why}</p>
                   </div>
                 </div>
               </div>
@@ -665,49 +727,44 @@ export default function About() {
       </Section>
 
       {/* ══════════ ON-CHAIN SVG MEDALS ══════════ */}
-      <Section id="medals" style={{ padding: '80px 32px' }}>
+      <Section id="medals" style={{ padding: '56px 16px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div id="med-hdr" data-reveal style={rv('med-hdr')}>
-
-            <h2 className="section-h" style={{ marginBottom: 28 }}>Art that lives on the blockchain.</h2>
+            <h2 className="section-h" style={{ marginBottom: 24 }}>Art that lives on the blockchain.</h2>
           </div>
           <div id="med-body" data-reveal style={{ ...rv('med-body', 100) }}>
-            <p className="body-text" style={{ marginBottom: 24 }}>
+            <p className="body-text" style={{ marginBottom: 20 }}>
               Every tier has a distinct medal design, generated entirely in Solidity as raw SVG markup. There is no external storage, no IPFS gateway, no image host. The SVG is constructed character by character inside the contract and returned as a Base64-encoded data URI directly from the tokenURI function.
             </p>
-            <p className="body-text" style={{ marginBottom: 24 }}>
+            <p className="body-text" style={{ marginBottom: 20 }}>
               The Unranked medal is a grey hexagon bearing a question mark — deliberately austere. The Bronze medal is a copper circle with a six-point star. Silver brings a five-point star and a cooler metallic palette. Gold introduces a crown with five coloured gemstones. Platinum is the most elaborate — a layered diamond facet with sparkle accents and multiple concentric rings.
             </p>
-
             <div className="pull-quote" style={{ borderColor: '#c9933a30', background: 'rgba(201,147,58,0.04)' }}>
-              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(16px,2vw,20px)', fontWeight: 700, color: '#7a5500', lineHeight: 1.55, fontStyle: 'italic' }}>
+              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(14px,2vw,20px)', fontWeight: 700, color: '#7a5500', lineHeight: 1.55, fontStyle: 'italic' }}>
                 "The most elegant detail: the medal is dynamic. The contract reads your current score from the engine every time tokenURI is called and renders the appropriate tier's artwork. As you climb from Bronze to Gold, your medal upgrades on every refresh — with no re-mint, no transaction, no gas."
               </p>
             </div>
-
             <p className="body-text">
-              This design means the Soulbound Token is genuinely living artwork. It is a visual representation of your on-chain reputation that updates in real time. Any wallet, marketplace, or dashboard that supports ERC-721 tokenURI rendering will display your current tier automatically — MetaMask, OpenSea, Zora, or any custom frontend.
+              This design means the Soulbound Token is genuinely living artwork. It is a visual representation of your on-chain reputation that updates in real time. Any wallet, marketplace, or dashboard that supports ERC-721 tokenURI rendering will display your current tier automatically.
             </p>
           </div>
         </div>
       </Section>
 
       {/* ══════════ DESIGN PHILOSOPHY ══════════ */}
-      <Section id="philosophy" style={{ padding: '80px 32px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
+      <Section id="philosophy" style={{ padding: '56px 16px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div id="phi-hdr" data-reveal style={{ marginBottom: 56, ...rv('phi-hdr') }}>
-
+          <div id="phi-hdr" data-reveal style={{ marginBottom: 40, ...rv('phi-hdr') }}>
             <h2 className="section-h">Why it was built this way.</h2>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {PRINCIPLES.map((p, i) => (
-              <div key={p.num} id={`phi${i}`} data-reveal style={{ padding: '30px 34px', borderRadius: 18, background: 'rgba(255,255,255,0.88)', border: `1px solid ${p.c}15`, ...rv(`phi${i}`, i * 70) }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
-                  <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 28, color: `${p.c}55`, lineHeight: 1, flexShrink: 0, paddingTop: 2 }}>{p.num}</div>
+              <div key={p.num} id={`phi${i}`} data-reveal className="principle-card" style={{ padding: '24px 22px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: `1px solid ${p.c}15`, ...rv(`phi${i}`, i * 70) }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                  <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 24, color: `${p.c}55`, lineHeight: 1, flexShrink: 0, paddingTop: 2 }}>{p.num}</div>
                   <div>
-                    <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(17px,2.2vw,22px)', color: p.c, letterSpacing: '-0.02em', marginBottom: 14, lineHeight: 1.2 }}>{p.title}</h3>
-                    <p style={{ fontSize: 'clamp(14px,1.5vw,15.5px)', fontWeight: 400, color: 'rgba(13,11,20,0.66)', lineHeight: 1.82 }}>{p.body}</p>
+                    <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(15px,2.2vw,20px)', color: p.c, letterSpacing: '-0.02em', marginBottom: 12, lineHeight: 1.2 }}>{p.title}</h3>
+                    <p style={{ fontSize: 'clamp(13px,1.5vw,15px)', fontWeight: 400, color: 'rgba(13,11,20,0.66)', lineHeight: 1.78 }}>{p.body}</p>
                   </div>
                 </div>
               </div>
@@ -717,26 +774,23 @@ export default function About() {
       </Section>
 
       {/* ══════════ SECURITY ══════════ */}
-      <Section id="security" style={{ padding: '80px 32px' }}>
+      <Section id="security" style={{ padding: '56px 16px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div id="sec-hdr" data-reveal style={rv('sec-hdr')}>
-     
-            <h2 className="section-h" style={{ marginBottom: 28 }}>Designed to be attacked. Built to hold.</h2>
+            <h2 className="section-h" style={{ marginBottom: 24 }}>Designed to be attacked. Built to hold.</h2>
           </div>
           <div id="sec-body" data-reveal style={{ ...rv('sec-body', 90) }}>
-            <p className="body-text" style={{ marginBottom: 24 }}>
-              Every state-changing function in the system follows the Checks-Effects-Interactions pattern without exception. This means all validation happens first, all storage writes happen second, and any external calls happen last — so that if an external call were to somehow re-enter the contract, all storage would already reflect the post-action state.
+            <p className="body-text" style={{ marginBottom: 20 }}>
+              Every state-changing function in the system follows the Checks-Effects-Interactions pattern without exception. This means all validation happens first, all storage writes happen second, and any external calls happen last.
             </p>
-            <p className="body-text" style={{ marginBottom: 24 }}>
-              Reentrancy guards are applied to every state-changing function in both the Engine and the Vault. The Vault is not upgradeable and has no delegate calls, eliminating a large class of proxy-related vulnerabilities. The Engine's UUPS upgrade mechanism is gated behind the owner address — in a production deployment, this should be a multi-signature wallet or a TimelockController that enforces a mandatory delay before upgrades can execute.
+            <p className="body-text" style={{ marginBottom: 20 }}>
+              Reentrancy guards are applied to every state-changing function in both the Engine and the Vault. The Vault is not upgradeable and has no delegate calls, eliminating a large class of proxy-related vulnerabilities. The Engine's UUPS upgrade mechanism is gated behind the owner address.
             </p>
-            <p className="body-text" style={{ marginBottom: 36 }}>
-              Score arithmetic is handled by a pure library with no state and no external calls. The Action enum gates all score mutations — it is impossible for any caller to supply an arbitrary integer delta. Score bounds are enforced at both the entry and exit of every calculation: inputs are validated against the maximum before processing, and outputs are clamped before storage. Underflow and overflow are structurally impossible.
+            <p className="body-text" style={{ marginBottom: 32 }}>
+              Score arithmetic is handled by a pure library with no state and no external calls. The Action enum gates all score mutations — it is impossible for any caller to supply an arbitrary integer delta. Score bounds are enforced at both the entry and exit of every calculation.
             </p>
-
-            <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(18px,2.2vw,22px)', color: '#0d0b14', marginBottom: 20 }}>Security invariants at a glance</h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(16px,2.2vw,22px)', color: '#0d0b14', marginBottom: 18 }}>Security invariants at a glance</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 { inv: 'One SBT per wallet, ever', how: 'Enforced by a wallet-to-tokenId mapping. Any attempt to issue a second token to the same address reverts.' },
                 { inv: 'Transfer always reverts', how: 'The _update() hook — the lowest-level transfer primitive in OpenZeppelin ERC-721 v5 — is overridden to block any from-non-zero to-non-zero transition.' },
@@ -745,19 +799,18 @@ export default function About() {
                 { inv: 'All mutations follow CEI', how: 'Checks, Effects, Interactions — in that order, without exception, across all contracts.' },
                 { inv: 'SBT auto-issued last in CEI', how: 'The token.issue() call happens after all storage writes in recordAction(), so any theoretical reentrancy into the engine sees a fully committed post-action state.' },
               ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderRadius: 13, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(13,11,20,0.07)' }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', flexShrink: 0, marginTop: 7 }} />
+                <div key={i} className="security-item" style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(13,11,20,0.07)' }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', flexShrink: 0, marginTop: 6 }} />
                   <div>
-                    <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13.5, color: '#0d0b14', marginBottom: 5 }}>{item.inv}</div>
-                    <div style={{ fontSize: 13, color: 'rgba(13,11,20,0.54)', lineHeight: 1.68 }}>{item.how}</div>
+                    <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, color: '#0d0b14', marginBottom: 4 }}>{item.inv}</div>
+                    <div style={{ fontSize: 12.5, color: 'rgba(13,11,20,0.54)', lineHeight: 1.65 }}>{item.how}</div>
                   </div>
                 </div>
               ))}
             </div>
-
-            <div style={{ marginTop: 28, padding: '18px 22px', borderRadius: 13, background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.16)' }}>
+            <div style={{ marginTop: 24, padding: '16px 18px', borderRadius: 12, background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.16)' }}>
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: 'rgba(239,68,68,0.7)', letterSpacing: '0.12em', marginBottom: 8 }}>⚠ DISCLAIMER</div>
-              <p style={{ fontSize: 13, color: 'rgba(13,11,20,0.56)', lineHeight: 1.72 }}>
+              <p style={{ fontSize: 12.5, color: 'rgba(13,11,20,0.56)', lineHeight: 1.7 }}>
                 These contracts implement production-grade security patterns and have been thoroughly self-audited by the author. They have not undergone a formal external security audit. Do not deploy to mainnet with real funds without engaging a professional smart contract auditing firm.
               </p>
             </div>
@@ -766,15 +819,13 @@ export default function About() {
       </Section>
 
       {/* ══════════ DEPLOYED CONTRACTS ══════════ */}
-      <Section id="deployed" style={{ padding: '80px 32px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
+      <Section id="deployed" style={{ padding: '56px 16px', background: 'rgba(255,255,255,0.45)', borderTop: '1px solid rgba(13,11,20,0.07)', borderBottom: '1px solid rgba(13,11,20,0.07)' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div id="dep-hdr" data-reveal style={{ marginBottom: 48, ...rv('dep-hdr') }}>
-
+          <div id="dep-hdr" data-reveal style={{ marginBottom: 36, ...rv('dep-hdr') }}>
             <h2 className="section-h">Live on Ethereum Sepolia Testnet.</h2>
-            <p style={{ fontSize: 15, color: 'rgba(13,11,20,0.55)', marginTop: 14, lineHeight: 1.76 }}>All contracts are verified and publicly readable on Etherscan. Interact with the proxy address for the Engine — never the implementation directly.</p>
+            <p style={{ fontSize: 'clamp(13px,1.5vw,15px)', color: 'rgba(13,11,20,0.55)', marginTop: 12, lineHeight: 1.72 }}>All contracts are verified and publicly readable on Etherscan. Interact with the proxy address for the Engine — never the implementation directly.</p>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[
               { ...CONTRACTS[0], impl: null },
               {
@@ -789,14 +840,15 @@ export default function About() {
               },
               { ...CONTRACTS[2], impl: null },
             ].map((c, i) => (
-              <div key={c.name} id={`dep${i}`} data-reveal style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '22px 26px', borderRadius: 16, background: 'rgba(255,255,255,0.9)', border: `1px solid ${c.c}18`, flexWrap: 'wrap' as const, ...rv(`dep${i}`, i * 70) }}>
-                <div style={{ fontSize: 22, flexShrink: 0 }}>{c.icon}</div>
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, color: '#0d0b14', marginBottom: 3 }}>{c.name}</div>
-                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: 'rgba(13,11,20,0.45)', letterSpacing: '0.04em' }}>{c.fullAddr}</div>
+              <div key={c.name} id={`dep${i}`} data-reveal style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '18px 20px', borderRadius: 14, background: 'rgba(255,255,255,0.9)', border: `1px solid ${c.c}18`, flexWrap: 'wrap' as const, ...rv(`dep${i}`, i * 70) }}>
+                <div style={{ fontSize: 20, flexShrink: 0, paddingTop: 2 }}>{c.icon}</div>
+                <div style={{ flex: 1, minWidth: 160 }}>
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, color: '#0d0b14', marginBottom: 4 }}>{c.name}</div>
+                  {/* Full address truncated on mobile */}
+                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: 'rgba(13,11,20,0.45)', letterSpacing: '0.02em', wordBreak: 'break-all' }}>{c.fullAddr}</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' as const }}>
-                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 600, color: c.c, padding: '4px 10px', borderRadius: 7, background: `${c.c}10`, border: `1px solid ${c.c}22`, letterSpacing: '0.08em' }}>{c.tag}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const }}>
+                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 600, color: c.c, padding: '3px 8px', borderRadius: 6, background: `${c.c}10`, border: `1px solid ${c.c}22`, letterSpacing: '0.08em' }}>{c.tag}</span>
                   <a href={c.etherscan} target="_blank" rel="noopener noreferrer" className="contract-chip"
                     style={{ background: `${c.c}0e`, border: `1px solid ${c.c}25`, color: c.c, fontSize: 10 }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${c.c}1e`}
@@ -812,43 +864,43 @@ export default function About() {
       </Section>
 
       {/* ══════════ CLOSING CTA ══════════ */}
-      <section style={{ position: 'relative', zIndex: 1, padding: '100px 32px', textAlign: 'center', overflow: 'hidden', background: 'linear-gradient(150deg, rgba(253,220,245,0.45) 0%, rgba(235,228,252,0.45) 50%, rgba(254,240,195,0.36) 100%)', borderTop: '1px solid rgba(124,92,191,0.1)' }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', width: 600, height: 600, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,92,191,0.05) 0%, rgba(194,53,122,0.025) 45%, transparent 70%)', pointerEvents: 'none' }} />
-        <div id="cta-close" data-reveal style={{ position: 'relative', zIndex: 1, maxWidth: 540, margin: '0 auto', ...rv('cta-close') }}>
-          <div style={{ fontSize: 52, marginBottom: 24, display: 'inline-block', animation: 'floatGem 6s ease-in-out infinite', filter: 'drop-shadow(0 4px 16px rgba(124,92,191,0.24))' }}>◆</div>
-          <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 'clamp(30px,5vw,54px)', letterSpacing: '-0.03em', color: '#0d0b14', marginBottom: 18, lineHeight: 1.05 }}>
+      <section style={{ position: 'relative', zIndex: 1, padding: '72px 16px', textAlign: 'center', overflow: 'hidden', background: 'linear-gradient(150deg, rgba(253,220,245,0.45) 0%, rgba(235,228,252,0.45) 50%, rgba(254,240,195,0.36) 100%)', borderTop: '1px solid rgba(124,92,191,0.1)' }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', width: 400, height: 400, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,92,191,0.05) 0%, rgba(194,53,122,0.025) 45%, transparent 70%)', pointerEvents: 'none' }} />
+        <div id="cta-close" data-reveal style={{ position: 'relative', zIndex: 1, maxWidth: 520, margin: '0 auto', ...rv('cta-close') }}>
+          <div style={{ fontSize: 44, marginBottom: 20, display: 'inline-block', animation: 'floatGem 6s ease-in-out infinite', filter: 'drop-shadow(0 4px 16px rgba(124,92,191,0.24))' }}>◆</div>
+          <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 'clamp(26px,5vw,52px)', letterSpacing: '-0.03em', color: '#0d0b14', marginBottom: 16, lineHeight: 1.05 }}>
             Ready to build your<br />
             <span style={{ background: 'linear-gradient(130deg, #7c3aed, #c2357a, #c9933a)', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', animation: 'shimmerTitle 3s linear infinite' }}>on-chain identity?</span>
           </h2>
-          <p style={{ fontSize: 16, fontWeight: 400, color: 'rgba(13,11,20,0.6)', marginBottom: 36, lineHeight: 1.78 }}>
+          <p style={{ fontSize: 'clamp(14px,1.6vw,16px)', fontWeight: 400, color: 'rgba(13,11,20,0.6)', marginBottom: 30, lineHeight: 1.75 }}>
             Connect your wallet, take your first action, and receive your Soulbound Token — automatically issued, permanently yours.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/" style={{ padding: '14px 30px', borderRadius: 13, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', color: '#fff', fontSize: 14, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, textDecoration: 'none', letterSpacing: '0.03em', boxShadow: '0 8px 28px rgba(124,58,237,0.3)', animation: 'pulseGlow 3s ease-in-out infinite', transition: 'transform 0.22s ease' }}
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a href="/" style={{ padding: '13px 26px', borderRadius: 12, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', color: '#fff', fontSize: 14, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, textDecoration: 'none', letterSpacing: '0.03em', boxShadow: '0 8px 28px rgba(124,58,237,0.3)', animation: 'pulseGlow 3s ease-in-out infinite', transition: 'transform 0.22s ease' }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px) scale(1.02)'}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = 'none'}
             >Launch App →</a>
             <a href="https://github.com/NexTechArchitect/RST-Reputation-Protocol" target="_blank" rel="noopener noreferrer"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 24px', borderRadius: 13, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', color: 'rgba(13,11,20,0.62)', fontSize: 14, fontFamily: "'DM Sans',sans-serif", fontWeight: 500, textDecoration: 'none', transition: 'all 0.22s ease' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 22px', borderRadius: 12, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', color: 'rgba(13,11,20,0.62)', fontSize: 14, fontFamily: "'DM Sans',sans-serif", fontWeight: 500, textDecoration: 'none', transition: 'all 0.22s ease' }}
               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(124,92,191,0.1)'; el.style.color = '#7c5cbf'; el.style.borderColor = 'rgba(124,92,191,0.28)'; }}
               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(13,11,20,0.06)'; el.style.color = 'rgba(13,11,20,0.62)'; el.style.borderColor = 'rgba(13,11,20,0.12)'; }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
               View Source Code
             </a>
           </div>
-          <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: 'rgba(13,11,20,0.28)', marginTop: 22, letterSpacing: '0.14em' }}>
+          <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: 'rgba(13,11,20,0.28)', marginTop: 20, letterSpacing: '0.12em' }}>
             SEPOLIA TESTNET · ERC-5484 SOULBOUND · BUILT BY NEXTECH ARCHITECT
           </p>
         </div>
       </section>
 
       {/* ══════════ FOOTER ══════════ */}
-      <footer style={{ position: 'relative', zIndex: 1, padding: '20px 40px', borderTop: '1px solid rgba(13,11,20,0.08)', background: 'rgba(253,251,255,0.96)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 26, height: 26, borderRadius: 8, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>◆</div>
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: 'rgba(13,11,20,0.5)' }}>RST Protocol Documentation</span>
+      <footer style={{ position: 'relative', zIndex: 1, padding: '16px 20px', borderTop: '1px solid rgba(13,11,20,0.08)', background: 'rgba(253,251,255,0.96)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ width: 24, height: 24, borderRadius: 7, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>◆</div>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: 'rgba(13,11,20,0.5)' }}>RST Protocol Documentation</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           <a href="/" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: 'rgba(13,11,20,0.4)', textDecoration: 'none', letterSpacing: '0.08em', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#7c5cbf'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(13,11,20,0.4)'}>← Back to App</a>
