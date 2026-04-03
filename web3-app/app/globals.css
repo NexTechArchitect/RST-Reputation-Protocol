@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── ROOT VARIABLES ──────────────────────────────────────────────── */
+:root {
+  --bg:           #fdfbff;
+  --surface:      rgba(255, 255, 255, 0.75);
+  --dark:         #0d0b14;
+  --text:         #0d0b14;
+  --text-mid:     rgba(13, 11, 20, 0.48);
+  --text-dim:     rgba(13, 11, 20, 0.28);
+  --pink:         #db2777;
+  --violet:       #7c3aed;
+  --pink-glow:    rgba(219, 39, 119, 0.22);
+  --violet-glow:  rgba(124, 58, 237, 0.18);
+  --font-display: 'Syne', sans-serif;
+  --font-ui:      'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+/* ── BASE RESET ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(219, 39, 119, 0.35); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(219, 39, 119, 0.6); }
+* { scrollbar-width: thin; scrollbar-color: rgba(219,39,119,0.35) transparent; }
+
+/* ── SELECTION ───────────────────────────────────────────────────── */
+::selection { background: rgba(219, 39, 119, 0.15); color: var(--text); }
+
+/* ── FOCUS ───────────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid rgba(219, 39, 119, 0.5); outline-offset: 3px; }
+
+/* ── TYPOGRAPHY ──────────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  color: var(--text);
+}
+
+p {
+  font-family: var(--font-ui);
+  font-weight: 300;
+  line-height: 1.72;
+}
+
+a { color: inherit; }
+
+/* ── RAINBOWKIT OVERRIDES ────────────────────────────────────────── */
+[data-rk] button {
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+}
+
+/* ── UTILITY ─────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
