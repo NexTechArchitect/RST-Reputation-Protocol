@@ -47,22 +47,6 @@ const CONTRACTS = [
   },
 ];
 
-// ── ORB (hides on small screens via CSS class) ────────────────────────────────
-interface OrbProps { size: number; x: string; y: string; delay?: number; dur?: number; c1?: string; c2?: string; c3?: string; mobileHide?: boolean; }
-function Orb({ size, x, y, delay = 0, dur = 5, c1 = '#fce7f3', c2 = '#e9d5ff', c3 = '#c4b5fd', mobileHide = false }: OrbProps) {
-  return (
-    <div
-      className={mobileHide ? 'orb-hide-mobile' : 'orb-scale-mobile'}
-      style={{
-        position: 'absolute', left: x, top: y, width: size, height: size, borderRadius: '50%',
-        background: `radial-gradient(circle at 33% 28%, rgba(255,255,255,0.95) 0%, ${c1} 25%, ${c2} 55%, ${c3} 82%, transparent 100%)`,
-        animation: `orbF${delay % 4} ${dur}s ease-in-out ${delay * 0.4}s infinite`,
-        pointerEvents: 'none',
-      }}
-    />
-  );
-}
-
 // ── RIBBON ────────────────────────────────────────────────────────────────────
 function RibbonLayer() {
   return (
@@ -112,11 +96,18 @@ export default function Home() {
   const [tierMorphing, setTierMorphing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Track if device is low-power (mobile) to disable canvas
+  const [isLowPower, setIsLowPower] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const autoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+    // Detect mobile/low-power: skip particle canvas on small screens or touch devices
+    const isMobile = window.innerWidth <= 1024 || ('ontouchstart' in window);
+    setIsLowPower(isMobile);
+  }, []);
 
   // ── AUTO-CYCLE: 4000ms, smooth 350ms morph ──
   useEffect(() => {
@@ -143,8 +134,9 @@ export default function Home() {
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  // ── PARTICLE CANVAS ────────────────────────────────────────────────────────
+  // ── PARTICLE CANVAS — only on desktop ──────────────────────────────────────
   useEffect(() => {
+    if (isLowPower) return; // skip canvas entirely on mobile
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -204,7 +196,7 @@ export default function Home() {
     };
     tick();
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }, []);
+  }, [isLowPower]);
 
   // ── SCROLL REVEAL ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -258,6 +250,7 @@ export default function Home() {
         ::-webkit-scrollbar-track { background: #fdfbff; }
         ::-webkit-scrollbar-thumb { background: rgba(124,92,191,0.4); border-radius: 2px; }
 
+        /* ══ KEYFRAMES — no will-change to avoid mobile GPU flicker ══ */
         @keyframes orbF0 { 0%,100%{transform:translate(0,0) rotate(0deg)} 33%{transform:translate(20px,-28px) rotate(5deg)} 66%{transform:translate(-12px,16px) rotate(-3deg)} }
         @keyframes orbF1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-25px,32px)} }
         @keyframes orbF2 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(16px,-20px)} 75%{transform:translate(-10px,13px)} }
@@ -271,7 +264,6 @@ export default function Home() {
         }
         @keyframes liveDot { 0%,100%{transform:scale(1);opacity:0.9} 50%{transform:scale(1.7);opacity:0.4} }
         @keyframes scrollHint { 0%,100%{transform:translateY(0);opacity:0.4} 50%{transform:translateY(10px);opacity:0.85} }
-        @keyframes floatGem { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-13px) rotate(7deg)} }
         @keyframes tierFloat { 0%,100%{transform:translateY(0px)} 33%{transform:translateY(-6px) rotate(2deg)} 66%{transform:translateY(-2px) rotate(-1.5deg)} }
         @keyframes contractGlow { 0%,100%{opacity:0.7} 50%{opacity:1} }
         @keyframes badgeShimmer { 0%,100%{background:rgba(255,255,255,0.82)} 50%{background:rgba(245,230,255,0.95)} }
@@ -314,7 +306,7 @@ export default function Home() {
         @keyframes floatOrb2 { 0%,100%{transform:translate(0,0) scale(1)} 60%{transform:translate(-16px,24px) scale(0.96)} }
         @keyframes floatOrb3 { 0%,100%{transform:translate(0,0)} 40%{transform:translate(20px,12px)} 75%{transform:translate(-10px,-7px)} }
 
-        /* ══ TIER MORPH — SMOOTH FADE + SLIDE (no blur, no rotateX) ══ */
+        /* ══ TIER MORPH — no will-change (causes repaint flash on mobile) ══ */
         @keyframes tierFadeOut {
           0%   { opacity: 1; transform: translateY(0) scale(1); }
           100% { opacity: 0; transform: translateY(-10px) scale(0.98); }
@@ -326,11 +318,9 @@ export default function Home() {
         }
         .tier-morphing-out {
           animation: tierFadeOut 0.32s cubic-bezier(0.4,0,1,1) forwards !important;
-          will-change: transform, opacity;
         }
         .tier-morphing-in {
           animation: tierFadeIn 0.42s cubic-bezier(0.16,1,0.3,1) forwards !important;
-          will-change: transform, opacity;
         }
 
         /* ══ HEADING SHIMMER ══ */
@@ -369,7 +359,7 @@ export default function Home() {
           position: fixed; top:0; left:0; right:0; z-index:900;
           padding: 14px 48px;
           display: flex; align-items: center; justify-content: space-between;
-          transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+          transition: background 0.4s ease, border-color 0.4s ease, padding 0.4s ease;
         }
         .nav-root.scrolled {
           background: rgba(253,251,255,0.92);
@@ -384,8 +374,13 @@ export default function Home() {
           font-size: clamp(38px, 7vw, 92px); line-height: 1.0; letter-spacing: -0.03em;
           background: linear-gradient(130deg, #0d0b14 0%, #3b0764 22%, #7c3aed 46%, #c2357a 68%, #c9933a 88%);
           background-size: 260% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          background-clip: text; animation: shimmerTitle 4.5s linear infinite, rgbShift 6s linear infinite;
+          background-clip: text; animation: shimmerTitle 4.5s linear infinite;
         }
+        /* Disable rgbShift on mobile — causes flicker */
+        @media (min-width: 1025px) {
+          .hero-title { animation: shimmerTitle 4.5s linear infinite, rgbShift 6s linear infinite; }
+        }
+
         .tier-pill { cursor: pointer; transition: all 0.32s cubic-bezier(0.16,1,0.3,1); }
         .contract-card { transition: all 0.3s cubic-bezier(0.16,1,0.3,1); }
         .contract-card:hover { transform: translateY(-8px) scale(1.01) !important; }
@@ -396,87 +391,87 @@ export default function Home() {
           animation: scanGlow 8s ease-in-out infinite;
         }
 
-        /* ══ ORB MOBILE HANDLING ══ */
-        /* On screens ≤900px: shrink large orbs, hide decoration-only ones */
-        @media (max-width: 900px) {
-          .orb-scale-mobile { transform: scale(0.45) !important; transform-origin: center center; opacity: 0.7; }
-          .orb-hide-mobile  { display: none !important; }
+        /* ══ ORBS — use display:none below 1025px to prevent layout paint & flicker ══ */
+        .orb-desktop-only {
+          display: none !important;
         }
-        @media (max-width: 600px) {
-          .orb-scale-mobile { transform: scale(0.35) !important; opacity: 0.55; }
+        @media (min-width: 1025px) {
+          .orb-desktop-only {
+            display: block !important;
+          }
         }
 
-        /* ══ RESPONSIVE BREAKPOINTS ══ */
-        @media (max-width: 1024px) { .contracts-grid { grid-template-columns: 1fr 1fr !important; } }
-
+        /* ══ NAV RESPONSIVE ══ */
         @media (max-width: 900px) {
           .nav-links-desk  { display: none !important; }
           .nav-root        { padding: 12px 18px !important; }
           .ham-btn         { display: flex !important; }
+        }
+
+        /* ══ LAYOUT RESPONSIVE — breakpoints at both px values so desktop-mode on phones also works ══ */
+        @media (max-width: 1024px) {
+          .contracts-grid { grid-template-columns: 1fr 1fr !important; }
           .tier-sidebar-arc { display: none !important; }
           .actions-two-col { grid-template-columns: 1fr !important; gap: 0 !important; }
           .actions-divider-v { display: none !important; }
-          .contracts-grid  { grid-template-columns: 1fr !important; }
-          .stats-row       { flex-wrap: wrap; gap: 18px !important; }
-          .hero-btns       { flex-direction: column; align-items: center !important; }
-          .footer-addrs    { display: none !important; }
+          .actions-score-viz { display: none !important; }
+          .hero-btns { flex-direction: column; align-items: center !important; }
+          .footer-addrs { display: none !important; }
           .tier-showcase-inner { flex-direction: column !important; gap: 20px !important; }
-          .actions-light-hero  { flex-direction: column !important; padding: 28px 20px !important; }
-          .actions-score-viz   { display: none !important; }
-          .gains-grid      { grid-template-columns: 1fr !important; }
+          .actions-light-hero { flex-direction: column !important; padding: 28px 20px !important; }
+          .gains-grid { grid-template-columns: 1fr !important; }
+          .stats-row { flex-wrap: wrap; gap: 18px !important; }
         }
 
-        /* ══ SECTION PADDING: compact on mobile ══ */
-        @media (max-width: 900px) {
-          /* Hero: remove excess vertical padding, no min-height overreach */
-          .hero-section    { padding: 90px 20px 44px !important; min-height: auto !important; }
-          /* Tiers section */
-          .tiers-section   { padding: 52px 20px 56px !important; }
-          /* Actions section inner */
+        @media (max-width: 768px) {
+          .contracts-grid { grid-template-columns: 1fr !important; }
+          .hero-section { padding: 90px 20px 44px !important; min-height: auto !important; }
+          .tiers-section { padding: 52px 20px 56px !important; }
           .actions-section-inner { padding: 56px 20px !important; }
-          /* Architecture section */
-          .arch-section    { padding: 56px 20px !important; }
-          /* CTA section */
-          .cta-section     { padding: 64px 20px !important; }
-          /* Generic section pad override */
-          .section-pad     { padding: 52px 18px !important; }
-
-          /* Tier showcase: tighter padding on mobile */
+          .arch-section { padding: 56px 20px !important; }
+          .cta-section { padding: 64px 20px !important; }
           .tier-showcase-card { padding: 28px 20px !important; }
-
-          /* Stats row tighter */
           .stats-row { gap: 14px !important; padding-top: 22px !important; margin-top: 36px !important; }
         }
 
-        @media (max-width: 600px) {
-          .hero-section    { padding: 82px 16px 36px !important; }
-          .tiers-section   { padding: 44px 16px 48px !important; }
+        @media (max-width: 480px) {
+          .hero-section { padding: 82px 16px 36px !important; }
+          .tiers-section { padding: 44px 16px 48px !important; }
           .actions-section-inner { padding: 44px 16px !important; }
-          .arch-section    { padding: 44px 16px !important; }
-          .cta-section     { padding: 52px 16px !important; }
+          .arch-section { padding: 44px 16px !important; }
+          .cta-section { padding: 52px 16px !important; }
           .heading-shimmer { font-size: clamp(26px, 7.5vw, 44px) !important; }
-          .gains-grid      { grid-template-columns: 1fr !important; }
           .contract-card-inner { padding: 24px 18px !important; }
           .tier-stat-pills { flex-wrap: wrap; }
-          .hero-title      { font-size: clamp(34px, 9vw, 56px) !important; }
+          .hero-title { font-size: clamp(34px, 9vw, 56px) !important; }
           .tier-showcase-card { padding: 22px 16px !important; gap: 20px !important; }
-        }
-
-        @media (max-width: 420px) {
           .nav-root { padding: 10px 13px !important; }
-          .hero-section { padding: 76px 14px 32px !important; }
         }
 
-        /* Tier pills: wrap nicely on small screens */
+        /* Tier pills */
         .tier-pills-row { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin-bottom: 22px; }
-        @media (max-width: 600px) {
+        @media (max-width: 480px) {
           .tier-pills-row { gap: 6px; }
           .tier-pill { padding: 7px 14px !important; font-size: 12px !important; }
         }
+
+        /* ══ REDUCE MOTION: disable heavy animations on mobile ══ */
+        @media (max-width: 1024px) {
+          .cinematic-line { display: none !important; }
+          /* Slow down aurora to reduce repaint cost */
+          @keyframes auroraShift {
+            0%{background-position: 0% 50%;} 100%{background-position: 100% 50%;}
+          }
+        }
       `}</style>
 
-      {/* PARTICLE CANVAS */}
-      <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.7 }} />
+      {/* PARTICLE CANVAS — only rendered on desktop (isLowPower check in useEffect) */}
+      {!isLowPower && (
+        <canvas
+          ref={canvasRef}
+          style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.7 }}
+        />
+      )}
 
       {/* BG */}
       <div style={{
@@ -490,14 +485,23 @@ export default function Home() {
         `,
       }} />
 
-      {/* ORBS — mobileHide=true on purely decorative large ones */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        <Orb size={260} x="66%" y="-6%"  delay={0} dur={5} c1="rgba(251,200,228,0.88)" c2="rgba(192,175,251,0.72)" c3="rgba(143,45,230,0.3)"  mobileHide={false} />
-        <Orb size={180} x="-5%" y="8%"   delay={1} dur={4} c1="rgba(252,218,248,0.88)" c2="rgba(249,200,228,0.68)" c3="rgba(192,175,251,0.38)" mobileHide={false} />
-        <Orb size={135} x="60%" y="50%"  delay={2} dur={6} c1="rgba(254,246,190,0.88)" c2="rgba(252,218,172,0.68)" c3="rgba(242,152,5,0.25)"  mobileHide={true}  />
-        <Orb size={220} x="6%"  y="60%"  delay={0} dur={5} c1="rgba(220,240,252,0.88)" c2="rgba(188,216,252,0.68)" c3="rgba(95,98,238,0.25)"  mobileHide={true}  />
-        <Orb size={90}  x="86%" y="68%"  delay={1} dur={4} c1="rgba(252,222,222,0.88)" c2="rgba(250,160,160,0.68)" c3="rgba(215,32,32,0.2)"   mobileHide={true}  />
-        <Orb size={115} x="40%" y="86%"  delay={2} dur={6} c1="rgba(216,250,228,0.88)" c2="rgba(128,236,168,0.62)" c3="rgba(12,180,125,0.22)"  mobileHide={true}  />
+      {/* ══ ORBS — only on desktop via className ══ */}
+      <div className="orb-desktop-only" style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        {[
+          { size: 260, x: '66%', y: '-6%',  delay: 0, dur: 5, c1: 'rgba(251,200,228,0.88)', c2: 'rgba(192,175,251,0.72)', c3: 'rgba(143,45,230,0.3)',   anim: 'orbF0' },
+          { size: 180, x: '-5%', y: '8%',   delay: 1, dur: 4, c1: 'rgba(252,218,248,0.88)', c2: 'rgba(249,200,228,0.68)', c3: 'rgba(192,175,251,0.38)', anim: 'orbF1' },
+          { size: 135, x: '60%', y: '50%',  delay: 2, dur: 6, c1: 'rgba(254,246,190,0.88)', c2: 'rgba(252,218,172,0.68)', c3: 'rgba(242,152,5,0.25)',   anim: 'orbF2' },
+          { size: 220, x: '6%',  y: '60%',  delay: 0, dur: 5, c1: 'rgba(220,240,252,0.88)', c2: 'rgba(188,216,252,0.68)', c3: 'rgba(95,98,238,0.25)',   anim: 'orbF1' },
+          { size: 90,  x: '86%', y: '68%',  delay: 1, dur: 4, c1: 'rgba(252,222,222,0.88)', c2: 'rgba(250,160,160,0.68)', c3: 'rgba(215,32,32,0.2)',    anim: 'orbF3' },
+          { size: 115, x: '40%', y: '86%',  delay: 2, dur: 6, c1: 'rgba(216,250,228,0.88)', c2: 'rgba(128,236,168,0.62)', c3: 'rgba(12,180,125,0.22)',  anim: 'orbF2' },
+        ].map((o, i) => (
+          <div key={i} style={{
+            position: 'absolute', left: o.x, top: o.y, width: o.size, height: o.size, borderRadius: '50%',
+            background: `radial-gradient(circle at 33% 28%, rgba(255,255,255,0.95) 0%, ${o.c1} 25%, ${o.c2} 55%, ${o.c3} 82%, transparent 100%)`,
+            animation: `${o.anim} ${o.dur}s ease-in-out ${o.delay * 0.4}s infinite`,
+            pointerEvents: 'none',
+          }} />
+        ))}
       </div>
 
       {/* ══════════ NAVBAR ══════════ */}
@@ -509,7 +513,6 @@ export default function Home() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 15, flexShrink: 0,
             boxShadow: '0 4px 14px rgba(124,58,237,0.35)',
-            animation: 'rgbBorder 4s linear infinite',
             border: '1.5px solid rgba(124,92,191,0.4)',
           }}>◆</div>
           <div>
@@ -562,9 +565,7 @@ export default function Home() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="nav-connect-desk">
-            <ConnectButton showBalance={false} chainStatus="none" accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }} />
-          </div>
+          <ConnectButton showBalance={false} chainStatus="none" accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }} />
           <button onClick={() => setMenuOpen(!menuOpen)} className="ham-btn" aria-label="Toggle menu"
             style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: 6, flexDirection: 'column', gap: 5 }}>
             {[0,1,2].map(i => (
@@ -712,7 +713,7 @@ export default function Home() {
       </section>
 
       {/* ══════════ TIERS ══════════ */}
-      <section id="tiers" className="tiers-section section-pad" style={{ position: 'relative', zIndex: 1, padding: '92px 32px', overflow: 'hidden' }}>
+      <section id="tiers" className="tiers-section" style={{ position: 'relative', zIndex: 1, padding: '92px 32px', overflow: 'hidden' }}>
         <div id="tiers-hdr" data-reveal style={{ textAlign: 'center', marginBottom: 52, ...rv('tiers-hdr') }}>
           <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 500, color: '#6d44b8', letterSpacing: '0.26em', textTransform: 'uppercase', marginBottom: 16 }}>
             ◆ &nbsp;REPUTATION LADDER&nbsp; ◆
@@ -725,8 +726,6 @@ export default function Home() {
 
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           <div id="tier-showcase" data-reveal style={{ ...rv('tier-showcase'), marginBottom: 20 }}>
-
-            {/* ── TIER SHOWCASE — smooth fade morph ── */}
             <div
               className={`tier-showcase-card ${tierMorphing ? 'tier-morphing-out' : 'tier-morphing-in'}`}
               style={{
@@ -793,7 +792,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Arc ring */}
+              {/* Arc ring — desktop only */}
               <div className="tier-sidebar-arc" style={{ flexShrink: 0 }}>
                 <svg width={96} height={96} viewBox="0 0 96 96">
                   <circle cx={48} cy={48} r={40} fill="none" stroke="rgba(13,11,20,0.07)" strokeWidth={6.5} />
@@ -856,18 +855,10 @@ export default function Home() {
             rgba(253,251,255,0.7)
           `,
         }} />
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(124,92,191,0.04) 1px, transparent 0)`,
-          backgroundSize: '32px 32px',
-        }} />
-        {/* Subtle floating orbs (not giant) */}
-        <div style={{ position: 'absolute', top: '6%', left: '1%', width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,108,246,0.1) 0%, transparent 65%)', pointerEvents: 'none', animation: 'floatOrb1 8s ease-in-out infinite' }} />
-        <div style={{ position: 'absolute', top: '50%', right: '-4%', width: 220, height: 220, borderRadius: '50%', background: 'radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 60%)', pointerEvents: 'none', animation: 'floatOrb2 10s ease-in-out infinite' }} />
-        <div style={{ position: 'absolute', bottom: '8%', left: '30%', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 60%)', pointerEvents: 'none', animation: 'floatOrb3 7s ease-in-out infinite' }} />
 
         <div className="actions-section-inner" style={{ maxWidth: 1040, margin: '0 auto', position: 'relative', zIndex: 1, padding: '92px 32px' }}>
 
-          {/* Cinematic header */}
+          {/* Header */}
           <div id="actions-hdr" data-reveal style={{ marginBottom: 64, ...rv('actions-hdr') }}>
             <div className="actions-light-hero" style={{
               position: 'relative', borderRadius: 28, overflow: 'hidden',
@@ -909,7 +900,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Score viz */}
+              {/* Score viz — desktop only */}
               <div className="actions-score-viz" style={{ position: 'relative', width: 240, height: 240, flexShrink: 0, zIndex: 2 }}>
                 <div style={{ position: 'absolute', inset: -20, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, rgba(194,53,122,0.05) 45%, transparent 65%)', animation: 'orbF1 6s ease-in-out infinite' }} />
                 <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }} viewBox="0 0 240 240">
@@ -982,9 +973,7 @@ export default function Home() {
                       gridColumn: i === 4 ? '1 / -1' : 'auto',
                       ...rv(`act${i}`, i * 55),
                     }}>
-                    {/* Top accent */}
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2.5, borderRadius: '18px 18px 0 0', background: `linear-gradient(90deg, transparent, ${a.c}, transparent)`, opacity: hoveredAction === i ? 1 : 0.45, transition: 'opacity 0.35s ease' }} />
-                    {/* Corner glow */}
                     <div style={{ position: 'absolute', top: -18, right: -18, width: 90, height: 90, borderRadius: '50%', background: `radial-gradient(circle, ${a.c}18 0%, transparent 70%)`, opacity: hoveredAction === i ? 1 : 0.45, transition: 'opacity 0.35s ease', pointerEvents: 'none' }} />
 
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
