@@ -8,18 +8,20 @@
 [![Stack](https://img.shields.io/badge/Stack-Solidity_%7C_Foundry-blueviolet.svg)](https://getfoundry.sh)
 [![Network](https://img.shields.io/badge/Network-Sepolia_Testnet-blue.svg)](https://sepolia.etherscan.io/)
 [![Standard](https://img.shields.io/badge/Standard-ERC--5484_Soulbound-orange.svg)](https://eips.ethereum.org/EIPS/eip-5484)
+[![Frontend](https://img.shields.io/badge/Frontend-Next.js_%7C_Wagmi_v2-black.svg)](https://rst-reputation-protocol.vercel.app/)
+[![Live](https://img.shields.io/badge/Live-Vercel-brightgreen.svg)](https://rst-reputation-protocol.vercel.app/)
 
 <p align="center">
   <br>
   <b>A fully on-chain reputation protocol built on ERC-5484 Soulbound Tokens.</b><br>
   <i>Wallet behaviour tracked on-chain. Score evolves. Medal art upgrades automatically. No IPFS dependency.</i>
-  
   <br>
 </p>
 
 <br>
 
 <p align="center">
+  <a href="https://rst-reputation-protocol.vercel.app/">🌐 Live Demo</a> •
   <a href="https://github.com/NexTechArchitect">💻 Source Code</a> •
   <a href="https://sepolia.etherscan.io/address/0x9c77Ce31a110e360d62e4eF8B1F4cf8576F70F46">🔗 ReputationToken</a> •
   <a href="https://sepolia.etherscan.io/address/0x4eFC1adc7Dd594C4bB04865B6dCc5101392FaBD8">🔗 Engine Proxy</a> •
@@ -42,14 +44,51 @@ The scoring engine is **UUPS upgradeable** — logic can evolve as the protocol 
 
 ## 📑 Table of Contents
 
-1. [🏛️ Architecture](#-architecture)
-2. [✅ Deployed Contracts](#-deployed-contracts)
-3. [🎖️ Reputation Tiers & Medal System](#-reputation-tiers--medal-system)
-4. [⚙️ Scoring Actions](#-scoring-actions)
-5. [🧩 Smart Contract Breakdown](#-smart-contract-breakdown)
-6. [🧪 Testing Strategy](#-testing-strategy)
-7. [🚀 Local Setup](#-local-setup)
-8. [🗺️ Roadmap](#-roadmap)
+1. [🌐 Frontend App](#-frontend-app)
+2. [🏛️ Architecture](#-architecture)
+3. [✅ Deployed Contracts](#-deployed-contracts)
+4. [🎖️ Reputation Tiers & Medal System](#-reputation-tiers--medal-system)
+5. [⚙️ Scoring Actions](#-scoring-actions)
+6. [🧩 Smart Contract Breakdown](#-smart-contract-breakdown)
+7. [🧪 Testing Strategy](#-testing-strategy)
+8. [🚀 Local Setup](#-local-setup)
+
+---
+
+## 🌐 Frontend App
+
+A production-grade Web3 frontend ships alongside the protocol, deployed live at **[rst-reputation-protocol.vercel.app](https://rst-reputation-protocol.vercel.app/)**.
+
+### Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Web3 | Wagmi v2 · Viem · RainbowKit |
+| Styling | Inline CSS · CSS Animations · Canvas API |
+| Deployment | Vercel |
+| Network | Ethereum Sepolia Testnet |
+
+### Features
+
+- **Live reputation dashboard** — real-time score, tier, voting power, and loan access pulled directly from contracts
+- **Dynamic SBT medal display** — on-chain SVG decoded and rendered from `tokenURI()` with no IPFS
+- **All vault actions wired** — `castVote`, `submitProposal`, `mintNFT`, `takeLoan`, `repayLoan`, `claimAirdrop`, `settleAirdrop` — all executable from the UI
+- **Live cooldown bars** — per-action countdown timers that update every second
+- **30-day airdrop progress bar** — visual hold tracker with early-settle warning
+- **Animated tier showcase** — auto-cycles through all 5 tiers with cinematic morph transitions
+- **Scroll-reveal sections** — intersection observer based section animations
+- **Particle canvas background** — same as landing page, with comet trails
+
+### Run Locally
+
+```bash
+cd web3-app
+npm install
+npm run dev
+```
+
+> Requires MetaMask or any RainbowKit-supported wallet connected to **Sepolia Testnet**.
 
 ---
 
@@ -224,21 +263,19 @@ forge test --match-path test/fuzz/* -vvvv
 ### Prerequisites
 
 - [Foundry](https://getfoundry.sh) (nightly)
+- Node.js 18+ (for frontend)
 - Git
 
-### Installation
+### Smart Contracts
 
 ```bash
 git clone https://github.com/NexTechArchitect/ERC-5484.git
 cd ERC-5484
 
-# Install dependencies
 forge install OpenZeppelin/openzeppelin-contracts --no-commit
 forge install OpenZeppelin/openzeppelin-contracts-upgradeable --no-commit
 forge install foundry-rs/forge-std --no-commit
 ```
-
-### Environment Setup
 
 Create a `.env` file:
 
@@ -246,48 +283,30 @@ Create a `.env` file:
 PRIVATE_KEY=0x...
 DEPLOYER_ADDRESS=0x...
 SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
-BASE_RPC_URL=https://mainnet.base.org
 ETHERSCAN_API_KEY=...
-BASESCAN_API_KEY=...
 ```
-
-### Build & Test
 
 ```bash
 forge build
 forge test -v
-```
 
-### Deploy
-
-```bash
-# Sepolia
+# Deploy to Sepolia
 source .env && forge script script/DeployReputation.s.sol:DeployReputation \
   --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv
-
-# Base Mainnet
-source .env && forge script script/DeployReputation.s.sol:DeployReputation \
-  --rpc-url $BASE_RPC_URL --broadcast --verify \
-  --etherscan-api-key $BASESCAN_API_KEY -vvvv
 ```
 
-### Interact
+### Frontend
 
 ```bash
-# Cast a vote
-forge script script/Interactions.s.sol:CastVote \
-  --sig "run(address)" <VAULT_ADDRESS> \
-  --rpc-url $SEPOLIA_RPC_URL --broadcast
-
-# Check score and tier
-forge script script/Interactions.s.sol:CheckScore \
-  --sig "run(address,address)" <ENGINE_PROXY> <WALLET> \
-  --rpc-url $SEPOLIA_RPC_URL
+cd web3-app
+npm install
+npm run dev
+# → http://localhost:3000
 ```
 
+> Connect any RainbowKit-supported wallet to **Sepolia Testnet** to interact.
+
 ---
-
-
 
 ## ⚠️ Disclaimer
 
@@ -299,7 +318,7 @@ This repository is for educational and portfolio purposes. The smart contracts i
 
 **Engineered with ❤️ by [NexTech Architect](https://github.com/NexTechArchitect)**
 
-[Connect on 𝕏 (Twitter)](https://x.com/itZ_AmiT0)
+[🌐 Live Demo](https://rst-reputation-protocol.vercel.app/) · [Connect on 𝕏](https://x.com/itZ_AmiT0)
 
 *Smart Contract Developer · Solidity · Foundry · Web3 Engineering*
 
