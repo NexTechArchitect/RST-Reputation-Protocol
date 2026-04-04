@@ -107,19 +107,6 @@ function RibbonLayer() {
   );
 }
 
-// ── ORB ───────────────────────────────────────────────────────────────────────
-function Orb({ size, x, y, delay = 0, dur = 5, c1 = '#fce7f3', c2 = '#e9d5ff', c3 = '#c4b5fd' }:
-  { size: number; x: string; y: string; delay?: number; dur?: number; c1?: string; c2?: string; c3?: string }) {
-  return (
-    <div style={{
-      position: 'absolute', left: x, top: y, width: size, height: size, borderRadius: '50%',
-      background: `radial-gradient(circle at 33% 28%, rgba(255,255,255,0.95) 0%, ${c1} 25%, ${c2} 55%, ${c3} 82%, transparent 100%)`,
-      animation: `orbA${delay % 4} ${dur}s ease-in-out ${delay * 0.35}s infinite`,
-      pointerEvents: 'none',
-    }} />
-  );
-}
-
 // ── SCROLL REVEAL ─────────────────────────────────────────────────────────────
 function useReveal() {
   const [visible, setVisible] = useState<Set<string>>(new Set());
@@ -149,32 +136,26 @@ function Section({ id, children, style = {} }: { id: string; children: React.Rea
   );
 }
 
-// ── INLINE LABEL ──────────────────────────────────────────────────────────────
-function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 500,
-      color: '#6d44b8', letterSpacing: '0.26em', textTransform: 'uppercase' as const,
-      marginBottom: 14,
-    }}>{children}</div>
-  );
-}
-
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 export default function About() {
   const { rv } = useReveal();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLowPower, setIsLowPower] = useState(true); // default true, set false only on desktop
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 55);
     window.addEventListener('scroll', fn, { passive: true });
+    // Detect desktop: no touch + wide screen
+    const notMobile = window.innerWidth > 1024 && !('ontouchstart' in window);
+    setIsLowPower(!notMobile);
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  // Particle canvas
+  // Particle canvas — desktop only
   useEffect(() => {
+    if (isLowPower) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -206,7 +187,7 @@ export default function About() {
     };
     tick();
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }, []);
+  }, [isLowPower]);
 
   return (
     <>
@@ -230,73 +211,103 @@ export default function About() {
         @keyframes shimmerTitle { 0%{background-position:-200% center} 100%{background-position:200% center} }
         @keyframes liveDot { 0%,100%{transform:scale(1);opacity:0.9} 50%{transform:scale(1.7);opacity:0.4} }
         @keyframes scrollHint { 0%,100%{transform:translateY(0);opacity:0.4} 50%{transform:translateY(9px);opacity:0.8} }
-        @keyframes scanGlow { 0%{opacity:0;transform:translateY(-100%)} 10%{opacity:1} 90%{opacity:1} 100%{opacity:0;transform:translateY(100%)} }
         @keyframes pulseGlow { 0%,100%{box-shadow:0 8px 28px rgba(124,92,191,0.28)} 50%{box-shadow:0 14px 44px rgba(124,92,191,0.48)} }
         @keyframes floatGem { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
         @keyframes badgeShimmer { 0%,100%{background:rgba(255,255,255,0.82)} 50%{background:rgba(245,230,255,0.95)} }
-        @keyframes rgbShift { 0%{text-shadow:2px 0 0 rgba(255,0,100,.3),-2px 0 0 rgba(0,150,255,.3)} 25%{text-shadow:-2px 0 0 rgba(255,0,100,.3),2px 0 0 rgba(0,220,150,.3)} 50%{text-shadow:2px 0 0 rgba(100,0,255,.3),-2px 0 0 rgba(255,150,0,.3)} 75%{text-shadow:-2px 0 0 rgba(0,255,150,.3),2px 0 0 rgba(255,0,100,.3)} 100%{text-shadow:2px 0 0 rgba(255,0,100,.3),-2px 0 0 rgba(0,150,255,.3)} }
 
+        /* ── NAV ── */
         .nav-root {
           position: fixed; top: 0; left: 0; right: 0; z-index: 900;
           padding: 14px 48px; display: flex; align-items: center; justify-content: space-between;
-          transition: all 0.45s cubic-bezier(0.16,1,0.3,1);
+          transition: background 0.4s ease, border-color 0.4s ease, padding 0.4s ease;
         }
         .nav-root.scrolled {
-          background: rgba(253,251,255,0.92); backdrop-filter: blur(24px) saturate(1.6);
+          background: rgba(253,251,255,0.92);
+          backdrop-filter: blur(24px) saturate(1.6);
           -webkit-backdrop-filter: blur(24px) saturate(1.6);
-          border-bottom: 1px solid rgba(124,92,191,0.1); padding-top: 11px; padding-bottom: 11px;
+          border-bottom: 1px solid rgba(124,92,191,0.1);
+          padding-top: 11px; padding-bottom: 11px;
         }
 
-        .page-title {
-          font-family: 'Playfair Display', serif; font-weight: 900;
-          font-size: clamp(36px, 7vw, 86px); line-height: 1.0; letter-spacing: -0.03em;
-          background: linear-gradient(130deg, #0d0b14 0%, #3b0764 22%, #7c3aed 46%, #c2357a 68%, #c9933a 88%);
-          background-size: 260% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          background-clip: text; animation: shimmerTitle 4.5s linear infinite, rgbShift 7s linear infinite;
-        }
-        .section-h { font-family: 'Playfair Display', serif; font-weight: 900; font-size: clamp(24px,4.5vw,52px); letter-spacing: -0.03em; color: #0d0b14; line-height: 1.06; }
-        .body-text { font-size: clamp(14px,1.8vw,17px); font-weight: 400; color: rgba(13,11,20,0.68); line-height: 1.82; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .cinematic-line { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(124,92,191,0.45) 30%, rgba(194,53,122,0.55) 50%, rgba(124,92,191,0.45) 70%, transparent 100%); animation: scanGlow 9s ease-in-out infinite; }
-
-        .toc-link { display: flex; padding: 10px 0; border-bottom: 1px solid rgba(13,11,20,0.07); font-size: 13px; font-weight: 500; color: rgba(13,11,20,0.55); text-decoration: none; transition: all 0.2s ease; align-items: center; gap: 10px; }
-        .toc-link:hover { color: #7c5cbf; padding-left: 6px; }
-        .toc-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(13,11,20,0.28); min-width: 24px; }
-
-        .contract-chip { padding: 5px 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-
-        .divider-text { display: flex; align-items: center; gap: 18px; margin: 72px 0; }
-        .divider-text::before, .divider-text::after { content: ''; flex: 1; height: 1px; background: rgba(13,11,20,0.09); }
-
-        .pull-quote { border-left: 3px solid; padding: 22px 28px; border-radius: 0 14px 14px 0; margin: 36px 0; }
-
-        /* ── HERO SECTION MOBILE FIX ── */
-        .hero-section {
+        /* ── HERO — the key fix ── */
+        /* Do NOT use min-height: 100vh or 100svh here.
+           Instead use a fixed pixel min + flex centering so content
+           always visible without massive blank gap in desktop mode. */
+        .about-hero {
           position: relative;
           z-index: 1;
-          min-height: 100svh;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 90px 20px 60px;
           text-align: center;
           overflow: hidden;
+          /* Desktop: tall but bounded */
+          min-height: 600px;
+          max-height: 860px;
+          padding: 100px 24px 60px;
         }
 
-        /* ── ORB MOBILE: hide large orbs, scale down ── */
-        .orb-container {
-          position: fixed;
-          inset: 0;
-          z-index: 0;
-          overflow: hidden;
-          pointer-events: none;
+        @media (max-width: 1024px) {
+          .about-hero {
+            min-height: 520px;
+            max-height: 780px;
+            padding: 88px 20px 52px;
+          }
+        }
+        @media (max-width: 768px) {
+          .about-hero {
+            min-height: 460px !important;
+            max-height: 680px !important;
+            padding: 80px 16px 44px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .about-hero {
+            min-height: 420px !important;
+            max-height: 620px !important;
+            padding: 72px 14px 40px !important;
+          }
+        }
+        @media (max-height: 520px) {
+          .about-hero {
+            min-height: auto !important;
+            max-height: none !important;
+            padding: 68px 16px 32px !important;
+          }
         }
 
-        /* ── SECTION PADDING MOBILE FIX ── */
-        .sec-pad { padding: 56px 16px; }
+        /* ── PAGE TITLE ── */
+        .page-title {
+          font-family: 'Playfair Display', serif; font-weight: 900;
+          font-size: clamp(32px, 6vw, 80px); line-height: 1.02; letter-spacing: -0.03em;
+          background: linear-gradient(130deg, #0d0b14 0%, #3b0764 22%, #7c3aed 46%, #c2357a 68%, #c9933a 88%);
+          background-size: 260% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text; animation: shimmerTitle 4.5s linear infinite;
+        }
 
-        /* ── DESKTOP NAV ── */
+        .section-h { font-family: 'Playfair Display', serif; font-weight: 900; font-size: clamp(22px,4vw,50px); letter-spacing: -0.03em; color: #0d0b14; line-height: 1.06; }
+        .body-text { font-size: clamp(14px,1.6vw,16px); font-weight: 400; color: rgba(13,11,20,0.68); line-height: 1.82; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .pull-quote { border-left: 3px solid; padding: 20px 24px; border-radius: 0 12px 12px 0; margin: 32px 0; }
+
+        /* ── ORB: desktop only ── */
+        .orb-wrap {
+          position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+          /* hidden by default, shown only on desktop via media query */
+          display: none;
+        }
+        @media (min-width: 1025px) {
+          .orb-wrap { display: block; }
+        }
+
+        /* ── TOC ── */
+        .toc-link { display: flex; padding: 10px 0; border-bottom: 1px solid rgba(13,11,20,0.07); font-size: 13px; font-weight: 500; color: rgba(13,11,20,0.55); text-decoration: none; transition: all 0.2s ease; align-items: center; gap: 10px; }
+        .toc-link:hover { color: #7c5cbf; padding-left: 6px; }
+        .toc-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(13,11,20,0.28); min-width: 24px; }
+        .contract-chip { padding: 5px 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+        /* ── NAV RESPONSIVE ── */
         .nav-links-desk { display: flex; gap: 26px; align-items: center; }
         .ham-btn { display: none !important; }
 
@@ -304,52 +315,42 @@ export default function About() {
           .nav-root { padding: 12px 16px !important; }
           .nav-links-desk { display: none !important; }
           .ham-btn { display: flex !important; }
+        }
+        @media (max-width: 480px) {
+          .nav-root { padding: 10px 12px !important; }
+        }
+
+        /* ── LAYOUT GRIDS ── */
+        @media (max-width: 768px) {
           .two-col { grid-template-columns: 1fr !important; }
           .toc-grid { grid-template-columns: 1fr !important; }
-          /* CRITICAL: tighter hero on mobile */
-          .hero-section {
-            padding: 80px 16px 50px !important;
-            min-height: 100svh !important;
-            justify-content: center !important;
-          }
-          .sec-pad { padding: 52px 16px !important; }
-          .contract-row { flex-direction: column !important; gap: 8px !important; align-items: flex-start !important; }
-          /* Reduce orb sizes on mobile via opacity only (can't resize fixed positioned divs easily) */
-          .orb-mobile-hide { display: none !important; }
+          .tier-cards { grid-template-columns: 1fr 1fr !important; }
         }
-
-        @media (max-width: 600px) {
-          .nav-root { padding: 10px 14px !important; }
-          .pull-quote { padding: 14px 16px; }
+        @media (max-width: 480px) {
           .tier-cards { grid-template-columns: 1fr !important; }
-          .actions-grid { grid-template-columns: 1fr !important; }
-          .hero-section {
-            padding: 75px 16px 45px !important;
-          }
-          .page-title { font-size: clamp(32px, 9vw, 52px) !important; }
-          /* Hide scroll hint on very small screens */
-          .scroll-hint { display: none !important; }
-          /* Toc padding */
-          .toc-inner { padding: 24px 20px !important; }
-          /* Contract card padding */
-          .contract-card { padding: 22px 18px !important; }
-          /* Principle card */
-          .principle-card { padding: 20px 18px !important; }
-          /* Security item */
-          .security-item { padding: 14px 14px !important; }
+          .pull-quote { padding: 14px 16px; }
+          .toc-inner { padding: 22px 18px !important; }
+          .contract-card { padding: 20px 16px !important; }
+          .principle-card { padding: 18px 16px !important; }
+          .security-item { padding: 12px 14px !important; }
         }
 
-        /* Landscape mobile fix */
-        @media (max-height: 500px) and (max-width: 900px) {
-          .hero-section {
-            min-height: auto !important;
-            padding: 70px 16px 40px !important;
-          }
+        /* ── SECTION PADDING ── */
+        .sec-pad { padding: 56px 16px; }
+        @media (max-width: 768px) { .sec-pad { padding: 48px 16px; } }
+        @media (max-width: 480px) { .sec-pad { padding: 40px 14px; } }
+
+        /* ── SCROLL HINT: hide on short screens ── */
+        @media (max-height: 600px), (max-width: 480px) {
+          .scroll-hint { display: none !important; }
         }
       `}</style>
 
-      {/* Particle canvas */}
-      <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />
+      {/* Particle canvas — desktop only, add class for CSS fallback */}
+      {!isLowPower && (
+        <canvas ref={canvasRef} className="particle-canvas"
+          style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.65 }} />
+      )}
 
       {/* Background gradient mesh */}
       <div style={{
@@ -363,19 +364,22 @@ export default function About() {
         `,
       }} />
 
-      {/* Orbs — hidden on small mobile via class */}
-      <div className="orb-container">
-        {/* Large top-right orb — hidden on mobile */}
-        <div className="orb-mobile-hide">
-          <Orb size={280} x="68%" y="-8%"  delay={0} dur={5} c1="rgba(251,200,228,0.85)" c2="rgba(192,175,251,0.7)"  c3="rgba(143,45,230,0.28)" />
-        </div>
-        {/* Small top-left — keep but reduce via % sizing */}
-        <Orb size={160} x="-4%" y="4%"   delay={1} dur={4} c1="rgba(252,218,248,0.85)" c2="rgba(249,200,228,0.65)" c3="rgba(192,175,251,0.35)" />
-        <Orb size={120} x="65%" y="50%"  delay={2} dur={6} c1="rgba(254,246,190,0.85)" c2="rgba(252,218,172,0.65)" c3="rgba(242,152,5,0.22)"   />
-        <div className="orb-mobile-hide">
-          <Orb size={220} x="5%"  y="60%"  delay={0} dur={5} c1="rgba(220,240,252,0.85)" c2="rgba(188,216,252,0.65)" c3="rgba(95,98,238,0.22)"   />
-        </div>
-        <Orb size={90}  x="86%" y="68%"  delay={1} dur={4} c1="rgba(252,222,222,0.85)" c2="rgba(250,160,160,0.65)" c3="rgba(215,32,32,0.18)"   />
+      {/* Orbs — desktop only via class */}
+      <div className="orb-wrap">
+        {[
+          { size: 280, x: '68%', y: '-8%',  delay: 0, dur: 5, c1: 'rgba(251,200,228,0.85)', c2: 'rgba(192,175,251,0.7)',  c3: 'rgba(143,45,230,0.28)',  anim: 'orbA0' },
+          { size: 160, x: '-4%', y: '4%',   delay: 1, dur: 4, c1: 'rgba(252,218,248,0.85)', c2: 'rgba(249,200,228,0.65)', c3: 'rgba(192,175,251,0.35)', anim: 'orbA1' },
+          { size: 120, x: '65%', y: '50%',  delay: 2, dur: 6, c1: 'rgba(254,246,190,0.85)', c2: 'rgba(252,218,172,0.65)', c3: 'rgba(242,152,5,0.22)',   anim: 'orbA2' },
+          { size: 220, x: '5%',  y: '60%',  delay: 0, dur: 5, c1: 'rgba(220,240,252,0.85)', c2: 'rgba(188,216,252,0.65)', c3: 'rgba(95,98,238,0.22)',   anim: 'orbA1' },
+          { size: 90,  x: '86%', y: '68%',  delay: 1, dur: 4, c1: 'rgba(252,222,222,0.85)', c2: 'rgba(250,160,160,0.65)', c3: 'rgba(215,32,32,0.18)',   anim: 'orbA3' },
+        ].map((o, i) => (
+          <div key={i} style={{
+            position: 'absolute', left: o.x, top: o.y, width: o.size, height: o.size, borderRadius: '50%',
+            background: `radial-gradient(circle at 33% 28%, rgba(255,255,255,0.95) 0%, ${o.c1} 25%, ${o.c2} 55%, ${o.c3} 82%, transparent 100%)`,
+            animation: `${o.anim} ${o.dur}s ease-in-out ${o.delay * 0.35}s infinite`,
+            pointerEvents: 'none',
+          }} />
+        ))}
       </div>
 
       {/* ══════════ NAVBAR ══════════ */}
@@ -403,15 +407,10 @@ export default function About() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* GitHub — hidden on small mobile to save space */}
           <a href="https://github.com/NexTechArchitect/RST-Reputation-Protocol" target="_blank" rel="noopener noreferrer"
-            className="orb-mobile-hide"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: 'rgba(13,11,20,0.55)', textDecoration: 'none', transition: 'all 0.2s ease', letterSpacing: '0.07em' }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(124,92,191,0.1)'; el.style.color = '#7c5cbf'; }}
-            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(13,11,20,0.06)'; el.style.color = 'rgba(13,11,20,0.55)'; }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-            GitHub
-          </a>
+            style={{ display: 'none' }}
+            className="nav-links-desk"
+          >GitHub</a>
 
           <button onClick={() => setMenuOpen(!menuOpen)} className="ham-btn" aria-label="Toggle menu"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, flexDirection: 'column' as const, gap: 5, alignItems: 'center', justifyContent: 'center' }}>
@@ -423,52 +422,49 @@ export default function About() {
       </nav>
 
       {/* Mobile menu */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 890, background: '#fdfbff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 28, opacity: menuOpen ? 1 : 0, pointerEvents: menuOpen ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 890, background: '#fdfbff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24, opacity: menuOpen ? 1 : 0, pointerEvents: menuOpen ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
         {['Overview', 'Architecture', 'Tiers', 'Actions', 'Security', '← App'].map((item, i) => (
           <a key={item} href={item === '← App' ? '/' : `#${item.toLowerCase()}`} onClick={() => setMenuOpen(false)}
-            style={{ fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 700, color: '#0d0b14', textDecoration: 'none', opacity: menuOpen ? 1 : 0, transform: menuOpen ? 'none' : 'translateY(16px)', transition: `all 0.44s cubic-bezier(0.16,1,0.3,1) ${i * 50}ms` }}
+            style={{ fontFamily: "'Playfair Display',serif", fontSize: 30, fontWeight: 700, color: '#0d0b14', textDecoration: 'none', opacity: menuOpen ? 1 : 0, transform: menuOpen ? 'none' : 'translateY(16px)', transition: `all 0.44s cubic-bezier(0.16,1,0.3,1) ${i * 50}ms` }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#c2357a'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#0d0b14'}
           >{item}</a>
         ))}
-        {/* GitHub link in mobile menu */}
         <a href="https://github.com/NexTechArchitect/RST-Reputation-Protocol" target="_blank" rel="noopener noreferrer"
           onClick={() => setMenuOpen(false)}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '10px 20px', borderRadius: 10, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: 'rgba(13,11,20,0.6)', textDecoration: 'none', opacity: menuOpen ? 1 : 0, transition: `all 0.44s cubic-bezier(0.16,1,0.3,1) 300ms` }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 4, padding: '10px 20px', borderRadius: 10, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: 'rgba(13,11,20,0.6)', textDecoration: 'none', opacity: menuOpen ? 1 : 0, transition: `all 0.44s cubic-bezier(0.16,1,0.3,1) 300ms` }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
           GitHub
         </a>
       </div>
 
       {/* ══════════ HERO ══════════ */}
-      {/* KEY FIX: removed minHeight 100vh inline, use className instead; tightened padding */}
-      <section className="hero-section">
+      <section className="about-hero">
         <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }}><RibbonLayer /></div>
-        <div className="cinematic-line" style={{ top: '28%', zIndex: 2 }} />
 
         <div style={{ position: 'relative', zIndex: 2, maxWidth: 820, width: '100%' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '7px 16px', borderRadius: 100, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,92,191,0.2)', fontSize: 9, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.6)', letterSpacing: '0.12em', marginBottom: 24, animation: 'heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both, badgeShimmer 4s ease-in-out infinite', boxShadow: '0 2px 12px rgba(124,92,191,0.1)', maxWidth: '90vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '6px 14px', borderRadius: 100, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,92,191,0.2)', fontSize: 9, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.6)', letterSpacing: '0.12em', marginBottom: 22, animation: 'heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both, badgeShimmer 4s ease-in-out infinite', boxShadow: '0 2px 12px rgba(124,92,191,0.1)' }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981', animation: 'liveDot 2s ease-in-out infinite', flexShrink: 0 }} />
             PROJECT DOCUMENTATION · RST PROTOCOL
           </div>
 
-          <h1 className="page-title" style={{ marginBottom: 20, animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both' }}>
+          <h1 className="page-title" style={{ marginBottom: 18, animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both' }}>
             What is the RST<br />Protocol?
           </h1>
 
-          <p className="body-text" style={{ maxWidth: 540, margin: '0 auto 32px', animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s both', padding: '0 4px' }}>
+          <p className="body-text" style={{ maxWidth: 520, margin: '0 auto 28px', animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s both', padding: '0 4px' }}>
             A fully on-chain reputation system that assigns every Ethereum wallet a permanent, non-transferable identity token — one that evolves as the wallet behaves. No servers. No databases. No IPFS. Just Solidity, storage, and truth.
           </p>
 
           {/* Jump links */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', animation: 'heroFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.28s both', padding: '0 4px' }}>
             {[
-              { l: 'Overview', href: '#overview', c: '#7c3aed' },
-              { l: 'Architecture', href: '#architecture', c: '#3b82f6' },
-              { l: 'Tiers', href: '#tiers', c: '#c9933a' },
-              { l: 'Security', href: '#security', c: '#e11d7a' },
+              { l: 'Overview',     href: '#overview',      c: '#7c3aed' },
+              { l: 'Architecture', href: '#architecture',  c: '#3b82f6' },
+              { l: 'Tiers',        href: '#tiers',         c: '#c9933a' },
+              { l: 'Security',     href: '#security',      c: '#e11d7a' },
             ].map(link => (
-              <a key={link.l} href={link.href} style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(13,11,20,0.1)', fontSize: 11, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.62)', textDecoration: 'none', letterSpacing: '0.08em', transition: 'all 0.22s ease' }}
+              <a key={link.l} href={link.href} style={{ padding: '7px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(13,11,20,0.1)', fontSize: 11, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.62)', textDecoration: 'none', letterSpacing: '0.08em', transition: 'all 0.22s ease' }}
                 onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.color = link.c; el.style.borderColor = `${link.c}40`; el.style.background = 'rgba(255,255,255,0.96)'; }}
                 onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.color = 'rgba(13,11,20,0.62)'; el.style.borderColor = 'rgba(13,11,20,0.1)'; el.style.background = 'rgba(255,255,255,0.82)'; }}
               >{link.l}</a>
@@ -476,17 +472,17 @@ export default function About() {
           </div>
         </div>
 
-        {/* Scroll hint — hidden on small screens via class */}
-        <div className="scroll-hint" style={{ position: 'absolute', bottom: 24, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, animation: 'scrollHint 2.2s ease-in-out infinite' }}>
+        {/* Scroll hint */}
+        <div className="scroll-hint" style={{ position: 'absolute', bottom: 20, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, animation: 'scrollHint 2.2s ease-in-out infinite' }}>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: 'rgba(13,11,20,0.32)', letterSpacing: '0.22em' }}>SCROLL TO READ</div>
           <div style={{ width: 1, height: 22, background: 'linear-gradient(to bottom, rgba(124,92,191,0.5), transparent)' }} />
         </div>
       </section>
 
       {/* ══════════ TABLE OF CONTENTS ══════════ */}
-      <Section id="toc" style={{ padding: '0 16px 56px' }}>
+      <Section id="toc" style={{ padding: '40px 16px 48px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div id="toc-block" data-reveal className="toc-inner" style={{ padding: '32px 36px', borderRadius: 20, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,92,191,0.12)', boxShadow: '0 8px 36px rgba(13,11,20,0.06)', ...rv('toc-block') }}>
+          <div id="toc-block" data-reveal className="toc-inner" style={{ padding: '28px 32px', borderRadius: 20, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,92,191,0.12)', boxShadow: '0 8px 36px rgba(13,11,20,0.06)', ...rv('toc-block') }}>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '0.22em', color: 'rgba(13,11,20,0.38)', marginBottom: 18, textTransform: 'uppercase' as const }}>Contents</div>
             <div className="toc-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 40px' }}>
               {[
@@ -511,8 +507,8 @@ export default function About() {
         </div>
       </Section>
 
-      {/* ══════════ OVERVIEW — THE PROBLEM ══════════ */}
-   <Section id="overview" style={{ padding: '56px 16px' }}>
+      {/* ══════════ OVERVIEW ══════════ */}
+      <Section id="overview" style={{ padding: '56px 16px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div id="ov-hdr" data-reveal style={rv('ov-hdr')}>
             <h2 className="section-h" style={{ marginBottom: 24 }}>On-chain identity is broken.</h2>
@@ -525,12 +521,12 @@ export default function About() {
               This creates a fundamental problem for any protocol that wants to reward trust, extend credit, or weight governance influence. Without persistent, verifiable on-chain identity, every system defaults to treating wallets as anonymous and equal — which they are not.
             </p>
             <div className="pull-quote" style={{ borderColor: '#7c3aed22', background: 'rgba(124,58,237,0.04)' }}>
-              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(15px,2.2vw,21px)', fontWeight: 700, color: '#3b0764', lineHeight: 1.55, fontStyle: 'italic' }}>
+              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(14px,2vw,20px)', fontWeight: 700, color: '#3b0764', lineHeight: 1.55, fontStyle: 'italic' }}>
                 "The RST Protocol solves this. Not with a centralised score, not with a KYC provider, not with a social graph — but with raw on-chain behaviour, permanently recorded and cryptographically verified."
               </p>
             </div>
             <p className="body-text" style={{ marginBottom: 20 }}>
-              When a wallet interacts with the RST Protocol, every action they take — every vote cast, every loan repaid, every airdrop held — is permanently written to the blockchain and translated into a numeric reputation score between 0 and 1000. That score determines their tier. Their tier determines their power in any protocol that integrates RST.
+              When a wallet interacts with the RST Protocol, every action they take — every vote cast, every loan repaid, every airdrop held — is permanently written to the blockchain and translated into a numeric reputation score between 0 and 1000.
             </p>
             <p className="body-text">
               The result is a composable reputation layer that any DeFi protocol can read from. Lending protocols can offer larger undercollateralised loans to Platinum wallets. DAOs can weight Platinum votes three times higher than Unranked wallets. All of this happens transparently, on-chain, without a single database or API call.
@@ -573,14 +569,11 @@ export default function About() {
             <p className="body-text" style={{ marginBottom: 20 }}>
               The RST Protocol is composed of three independent smart contracts, each with a single, clearly defined responsibility. This separation is not just a design preference — it is a security requirement.
             </p>
-            <p className="body-text" style={{ marginBottom: 20 }}>
-              The most important design decision in the entire system is the split between the token layer and the engine layer. The token — which holds the permanent record of who owns which Soulbound Token — is completely immutable. It cannot be upgraded, modified, or extended after deployment.
-            </p>
             <p className="body-text" style={{ marginBottom: 28 }}>
-              The engine — which calculates scores, resolves tiers, and decides when to issue tokens — is upgradeable via the UUPS proxy pattern. Scoring logic is not ground truth. It is policy, and policy must be allowed to evolve.
+              The token — which holds the permanent record of who owns which Soulbound Token — is completely immutable. The engine — which calculates scores, resolves tiers, and decides when to issue tokens — is upgradeable via the UUPS proxy pattern. Scoring logic is not ground truth. It is policy, and policy must be allowed to evolve.
             </p>
             {/* Architecture diagram */}
-            <div style={{ padding: '24px 20px', borderRadius: 16, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(13,11,20,0.08)', fontFamily: "'JetBrains Mono',monospace", fontSize: 11, lineHeight: 2.0, overflowX: 'auto' }}>
+            <div style={{ padding: '20px 18px', borderRadius: 16, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(13,11,20,0.08)', fontFamily: "'JetBrains Mono',monospace", fontSize: 11, lineHeight: 2.0, overflowX: 'auto' }}>
               <div style={{ color: 'rgba(13,11,20,0.4)', fontSize: 8, letterSpacing: '0.16em', marginBottom: 14 }}>SYSTEM LAYERS · TOP TO BOTTOM</div>
               {[
                 { label: 'USER / DAPP', sub: 'Wagmi v2 · Viem · RainbowKit', c: '#7c5cbf', arrow: true },
@@ -590,7 +583,7 @@ export default function About() {
               ].map((layer) => (
                 <div key={layer.label}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 14px', borderRadius: 10, background: `${layer.c}08`, border: `1px solid ${layer.c}18`, flexWrap: 'wrap' }}>
-                    <span style={{ color: layer.c, fontWeight: 600, fontSize: 10, letterSpacing: '0.08em', minWidth: 160, flexShrink: 0 }}>{layer.label}</span>
+                    <span style={{ color: layer.c, fontWeight: 600, fontSize: 10, letterSpacing: '0.08em', minWidth: 150, flexShrink: 0 }}>{layer.label}</span>
                     <span style={{ color: 'rgba(13,11,20,0.48)', fontSize: 10 }}>{layer.sub}</span>
                   </div>
                   {layer.arrow && <div style={{ textAlign: 'center', color: 'rgba(13,11,20,0.22)', fontSize: 14, margin: '2px 0' }}>↓</div>}
@@ -628,24 +621,24 @@ export default function About() {
                 detail: 'The airdrop mechanic is particularly deliberate: claiming an airdrop starts a timer, and settling it before 30 days have passed penalises the wallet with −20 points. Settling after 30 days rewards it with +15.',
               },
             ].map((c, i) => (
-              <div key={c.name} id={`ccard${i}`} data-reveal className="contract-card" style={{ padding: '28px 24px', borderRadius: 18, background: 'rgba(255,255,255,0.9)', border: `1px solid ${c.c}18`, overflow: 'hidden', position: 'relative', ...rv(`ccard${i}`, i * 90) }}>
+              <div key={c.name} id={`ccard${i}`} data-reveal className="contract-card" style={{ padding: '26px 22px', borderRadius: 18, background: 'rgba(255,255,255,0.9)', border: `1px solid ${c.c}18`, overflow: 'hidden', position: 'relative', ...rv(`ccard${i}`, i * 90) }}>
                 <div style={{ position: 'absolute', top: -16, right: -8, fontFamily: "'Playfair Display',serif", fontSize: 90, fontWeight: 900, color: `${c.c}06`, lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>{c.num}</div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 18, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 16, flexWrap: 'wrap' }}>
                   <div>
-                    <div className="contract-row" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 20 }}>{c.icon}</span>
-                      <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 'clamp(18px,2.5vw,24px)', color: '#0d0b14', letterSpacing: '-0.02em', lineHeight: 1 }}>{c.name}</h3>
+                      <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 'clamp(17px,2.5vw,23px)', color: '#0d0b14', letterSpacing: '-0.02em', lineHeight: 1 }}>{c.name}</h3>
                       <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 600, color: c.c, padding: '3px 8px', borderRadius: 6, background: `${c.c}10`, border: `1px solid ${c.c}22`, letterSpacing: '0.07em' }}>{c.tag}</span>
                     </div>
-                    <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(13px,1.6vw,16px)', fontStyle: 'italic', color: 'rgba(13,11,20,0.48)' }}>{c.heading}</div>
+                    <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(13px,1.5vw,15px)', fontStyle: 'italic', color: 'rgba(13,11,20,0.48)' }}>{c.heading}</div>
                   </div>
                 </div>
-                <p style={{ fontSize: 'clamp(13px,1.5vw,15px)', fontWeight: 400, color: 'rgba(13,11,20,0.66)', lineHeight: 1.78, marginBottom: 16 }}>{c.body}</p>
-                <div style={{ padding: '12px 16px', borderRadius: 10, background: `${c.c}06`, border: `1px solid ${c.c}14`, marginBottom: 18 }}>
-                  <p style={{ fontSize: 13, fontWeight: 400, color: 'rgba(13,11,20,0.58)', lineHeight: 1.7 }}>{c.detail}</p>
+                <p style={{ fontSize: 'clamp(13px,1.4vw,14.5px)', fontWeight: 400, color: 'rgba(13,11,20,0.66)', lineHeight: 1.78, marginBottom: 14 }}>{c.body}</p>
+                <div style={{ padding: '12px 14px', borderRadius: 10, background: `${c.c}06`, border: `1px solid ${c.c}14`, marginBottom: 16 }}>
+                  <p style={{ fontSize: 12.5, fontWeight: 400, color: 'rgba(13,11,20,0.58)', lineHeight: 1.7 }}>{c.detail}</p>
                 </div>
                 <a href={c.etherscan} target="_blank" rel="noopener noreferrer" className="contract-chip"
-                  style={{ background: `${c.c}0e`, border: `1px solid ${c.c}28`, color: c.c, flexWrap: 'wrap' as const }}
+                  style={{ background: `${c.c}0e`, border: `1px solid ${c.c}28`, color: c.c, flexWrap: 'wrap' as const, wordBreak: 'break-all' as const }}
                   onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${c.c}1e`}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = `${c.c}0e`}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -662,36 +655,31 @@ export default function About() {
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <div id="tier-hdr" data-reveal style={{ marginBottom: 36, ...rv('tier-hdr') }}>
             <h2 className="section-h">Five levels of trust.</h2>
-            <p style={{ fontSize: 'clamp(14px,1.6vw,16px)', color: 'rgba(13,11,20,0.58)', marginTop: 12, maxWidth: 520, lineHeight: 1.72 }}>
+            <p style={{ fontSize: 'clamp(13px,1.5vw,15px)', color: 'rgba(13,11,20,0.58)', marginTop: 12, maxWidth: 520, lineHeight: 1.72 }}>
               Your score places you in exactly one tier at any given time. Tiers determine two concrete privileges: how much your vote counts in governance, and how large an undercollateralised loan you can access.
             </p>
           </div>
-          <div className="tier-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+          <div className="tier-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
             {TIERS.map((t, i) => (
-              <div key={t.name} id={`tier${i}`} data-reveal style={{ padding: '22px 20px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: `1.5px solid ${t.c}22`, ...rv(`tier${i}`, i * 75) }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 12, background: `${t.c}12`, border: `1.5px solid ${t.c}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{t.icon}</div>
+              <div key={t.name} id={`tier${i}`} data-reveal style={{ padding: '20px 18px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: `1.5px solid ${t.c}22`, ...rv(`tier${i}`, i * 75) }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 11, background: `${t.c}12`, border: `1.5px solid ${t.c}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{t.icon}</div>
                   <div>
-                    <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 19, color: t.c, letterSpacing: '-0.01em', lineHeight: 1 }}>{t.name}</div>
+                    <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 18, color: t.c, letterSpacing: '-0.01em', lineHeight: 1 }}>{t.name}</div>
                     <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: 'rgba(13,11,20,0.4)', marginTop: 3 }}>Score {t.range}</div>
                   </div>
                 </div>
-                <p style={{ fontSize: 12.5, color: 'rgba(13,11,20,0.6)', lineHeight: 1.68, marginBottom: 16 }}>{t.medal}</p>
+                <p style={{ fontSize: 12, color: 'rgba(13,11,20,0.6)', lineHeight: 1.65, marginBottom: 14 }}>{t.medal}</p>
                 <div style={{ display: 'flex', gap: 8 }}>
                   {[{ l: 'Voting', v: t.voting }, { l: 'Loan Cap', v: t.loan }].map(s => (
-                    <div key={s.l} style={{ flex: 1, padding: '8px 8px', borderRadius: 9, background: `${t.c}09`, border: `1px solid ${t.c}1e`, textAlign: 'center' as const }}>
-                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: 'rgba(13,11,20,0.4)', letterSpacing: '0.1em', marginBottom: 4 }}>{s.l}</div>
-                      <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 18, color: t.c }}>{s.v}</div>
+                    <div key={s.l} style={{ flex: 1, padding: '7px 6px', borderRadius: 9, background: `${t.c}09`, border: `1px solid ${t.c}1e`, textAlign: 'center' as const }}>
+                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: 'rgba(13,11,20,0.4)', letterSpacing: '0.1em', marginBottom: 3 }}>{s.l}</div>
+                      <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 17, color: t.c }}>{s.v}</div>
                     </div>
                   ))}
                 </div>
               </div>
             ))}
-          </div>
-          <div id="tier-note" data-reveal style={{ marginTop: 22, padding: '16px 20px', borderRadius: 12, background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(13,11,20,0.07)', ...rv('tier-note', 200) }}>
-            <p style={{ fontSize: 12, fontFamily: "'JetBrains Mono',monospace", color: 'rgba(13,11,20,0.46)', letterSpacing: '0.04em', lineHeight: 1.7 }}>
-              Note: there is an intentional asymmetry between voting and borrowing. Even Unranked wallets retain a 0.5× voting multiplier — governance participation is always open. But Unranked wallets have zero access to undercollateralised credit. Borrowing requires demonstrated trust. Voting does not.
-            </p>
           </div>
         </div>
       </Section>
@@ -701,23 +689,21 @@ export default function About() {
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div id="act-hdr" data-reveal style={{ marginBottom: 36, ...rv('act-hdr') }}>
             <h2 className="section-h">What you do. What it costs. What it earns.</h2>
-            <p style={{ fontSize: 'clamp(14px,1.6vw,16px)', color: 'rgba(13,11,20,0.58)', marginTop: 12, lineHeight: 1.72 }}>
+            <p style={{ fontSize: 'clamp(13px,1.5vw,15px)', color: 'rgba(13,11,20,0.58)', marginTop: 12, lineHeight: 1.72 }}>
               Every action maps to a signed score delta. Positive actions build your reputation. Negative actions erode it. There is no undo, no appeal, and no reset.
             </p>
           </div>
-          <div className="actions-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
             {ACTIONS.map((a, i) => (
-              <div key={a.name} id={`act${i}`} data-reveal style={{ padding: '16px 18px', borderRadius: 13, background: 'rgba(255,255,255,0.85)', border: `1px solid ${a.c}18`, ...rv(`act${i}`, i * 60) }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 11, flexShrink: 0, background: `${a.c}10`, border: `1.5px solid ${a.c}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, color: a.c }}>
-                    {a.icon}
-                  </div>
+              <div key={a.name} id={`act${i}`} data-reveal style={{ padding: '14px 16px', borderRadius: 13, background: 'rgba(255,255,255,0.85)', border: `1px solid ${a.c}18`, ...rv(`act${i}`, i * 60) }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 11, flexShrink: 0, background: `${a.c}10`, border: `1.5px solid ${a.c}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: a.c }}>{a.icon}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 5, flexWrap: 'wrap' as const }}>
-                      <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 14, fontWeight: 700, color: '#0d0b14' }}>{a.name}</span>
-                      <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 18, color: a.pos ? '#0d9660' : '#ef4444', background: a.pos ? 'rgba(13,150,96,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 10px', borderRadius: 7, flexShrink: 0 }}>{a.delta}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4, flexWrap: 'wrap' as const }}>
+                      <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 13.5, fontWeight: 700, color: '#0d0b14' }}>{a.name}</span>
+                      <span style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 17, color: a.pos ? '#0d9660' : '#ef4444', background: a.pos ? 'rgba(13,150,96,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 9px', borderRadius: 7, flexShrink: 0 }}>{a.delta}</span>
                     </div>
-                    <p style={{ fontSize: 12.5, color: 'rgba(13,11,20,0.55)', lineHeight: 1.65 }}>{a.why}</p>
+                    <p style={{ fontSize: 12, color: 'rgba(13,11,20,0.55)', lineHeight: 1.65 }}>{a.why}</p>
                   </div>
                 </div>
               </div>
@@ -740,7 +726,7 @@ export default function About() {
               The Unranked medal is a grey hexagon bearing a question mark — deliberately austere. The Bronze medal is a copper circle with a six-point star. Silver brings a five-point star and a cooler metallic palette. Gold introduces a crown with five coloured gemstones. Platinum is the most elaborate — a layered diamond facet with sparkle accents and multiple concentric rings.
             </p>
             <div className="pull-quote" style={{ borderColor: '#c9933a30', background: 'rgba(201,147,58,0.04)' }}>
-              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(14px,2vw,20px)', fontWeight: 700, color: '#7a5500', lineHeight: 1.55, fontStyle: 'italic' }}>
+              <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(14px,2vw,19px)', fontWeight: 700, color: '#7a5500', lineHeight: 1.55, fontStyle: 'italic' }}>
                 "The most elegant detail: the medal is dynamic. The contract reads your current score from the engine every time tokenURI is called and renders the appropriate tier's artwork. As you climb from Bronze to Gold, your medal upgrades on every refresh — with no re-mint, no transaction, no gas."
               </p>
             </div>
@@ -759,12 +745,12 @@ export default function About() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {PRINCIPLES.map((p, i) => (
-              <div key={p.num} id={`phi${i}`} data-reveal className="principle-card" style={{ padding: '24px 22px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: `1px solid ${p.c}15`, ...rv(`phi${i}`, i * 70) }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                  <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 24, color: `${p.c}55`, lineHeight: 1, flexShrink: 0, paddingTop: 2 }}>{p.num}</div>
+              <div key={p.num} id={`phi${i}`} data-reveal className="principle-card" style={{ padding: '22px 20px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: `1px solid ${p.c}15`, ...rv(`phi${i}`, i * 70) }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <div style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 22, color: `${p.c}55`, lineHeight: 1, flexShrink: 0, paddingTop: 2 }}>{p.num}</div>
                   <div>
-                    <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(15px,2.2vw,20px)', color: p.c, letterSpacing: '-0.02em', marginBottom: 12, lineHeight: 1.2 }}>{p.title}</h3>
-                    <p style={{ fontSize: 'clamp(13px,1.5vw,15px)', fontWeight: 400, color: 'rgba(13,11,20,0.66)', lineHeight: 1.78 }}>{p.body}</p>
+                    <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(14px,2vw,19px)', color: p.c, letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.2 }}>{p.title}</h3>
+                    <p style={{ fontSize: 'clamp(13px,1.4vw,14.5px)', fontWeight: 400, color: 'rgba(13,11,20,0.66)', lineHeight: 1.78 }}>{p.body}</p>
                   </div>
                 </div>
               </div>
@@ -789,7 +775,7 @@ export default function About() {
             <p className="body-text" style={{ marginBottom: 32 }}>
               Score arithmetic is handled by a pure library with no state and no external calls. The Action enum gates all score mutations — it is impossible for any caller to supply an arbitrary integer delta. Score bounds are enforced at both the entry and exit of every calculation.
             </p>
-            <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(16px,2.2vw,22px)', color: '#0d0b14', marginBottom: 18 }}>Security invariants at a glance</h3>
+            <h3 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 'clamp(15px,2vw,21px)', color: '#0d0b14', marginBottom: 16 }}>Security invariants at a glance</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 { inv: 'One SBT per wallet, ever', how: 'Enforced by a wallet-to-tokenId mapping. Any attempt to issue a second token to the same address reverts.' },
@@ -799,16 +785,16 @@ export default function About() {
                 { inv: 'All mutations follow CEI', how: 'Checks, Effects, Interactions — in that order, without exception, across all contracts.' },
                 { inv: 'SBT auto-issued last in CEI', how: 'The token.issue() call happens after all storage writes in recordAction(), so any theoretical reentrancy into the engine sees a fully committed post-action state.' },
               ].map((item, i) => (
-                <div key={i} className="security-item" style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(13,11,20,0.07)' }}>
+                <div key={i} className="security-item" style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(13,11,20,0.07)' }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', flexShrink: 0, marginTop: 6 }} />
                   <div>
                     <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, color: '#0d0b14', marginBottom: 4 }}>{item.inv}</div>
-                    <div style={{ fontSize: 12.5, color: 'rgba(13,11,20,0.54)', lineHeight: 1.65 }}>{item.how}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(13,11,20,0.54)', lineHeight: 1.65 }}>{item.how}</div>
                   </div>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 24, padding: '16px 18px', borderRadius: 12, background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.16)' }}>
+            <div style={{ marginTop: 22, padding: '14px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.16)' }}>
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: 'rgba(239,68,68,0.7)', letterSpacing: '0.12em', marginBottom: 8 }}>⚠ DISCLAIMER</div>
               <p style={{ fontSize: 12.5, color: 'rgba(13,11,20,0.56)', lineHeight: 1.7 }}>
                 These contracts implement production-grade security patterns and have been thoroughly self-audited by the author. They have not undergone a formal external security audit. Do not deploy to mainnet with real funds without engaging a professional smart contract auditing firm.
@@ -827,7 +813,7 @@ export default function About() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[
-              { ...CONTRACTS[0], impl: null },
+              { ...CONTRACTS[0] },
               {
                 num: '02a', name: 'ReputationEngine (Proxy)', tag: 'Use this address', c: '#3b82f6', icon: '⚙️',
                 addr: '0x4eFC1adc...FaBD8', fullAddr: '0x4eFC1adc7Dd594C4bB04865B6dCc5101392FaBD8',
@@ -838,14 +824,13 @@ export default function About() {
                 addr: '0xC8153261...df5957', fullAddr: '0xC81532619d5fB4728932A43A77Bfea04c3df5957',
                 etherscan: 'https://sepolia.etherscan.io/address/0xC81532619d5fB4728932A43A77Bfea04c3df5957',
               },
-              { ...CONTRACTS[2], impl: null },
+              { ...CONTRACTS[2] },
             ].map((c, i) => (
-              <div key={c.name} id={`dep${i}`} data-reveal style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '18px 20px', borderRadius: 14, background: 'rgba(255,255,255,0.9)', border: `1px solid ${c.c}18`, flexWrap: 'wrap' as const, ...rv(`dep${i}`, i * 70) }}>
-                <div style={{ fontSize: 20, flexShrink: 0, paddingTop: 2 }}>{c.icon}</div>
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, color: '#0d0b14', marginBottom: 4 }}>{c.name}</div>
-                  {/* Full address truncated on mobile */}
-                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: 'rgba(13,11,20,0.45)', letterSpacing: '0.02em', wordBreak: 'break-all' }}>{c.fullAddr}</div>
+              <div key={c.name} id={`dep${i}`} data-reveal style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '16px 18px', borderRadius: 14, background: 'rgba(255,255,255,0.9)', border: `1px solid ${c.c}18`, flexWrap: 'wrap' as const, ...rv(`dep${i}`, i * 70) }}>
+                <div style={{ fontSize: 18, flexShrink: 0, paddingTop: 2 }}>{c.icon}</div>
+                <div style={{ flex: 1, minWidth: 140 }}>
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13.5, color: '#0d0b14', marginBottom: 4 }}>{c.name}</div>
+                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, color: 'rgba(13,11,20,0.45)', letterSpacing: '0.02em', wordBreak: 'break-all' }}>{c.fullAddr}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const }}>
                   <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 600, color: c.c, padding: '3px 8px', borderRadius: 6, background: `${c.c}10`, border: `1px solid ${c.c}22`, letterSpacing: '0.08em' }}>{c.tag}</span>
@@ -863,32 +848,32 @@ export default function About() {
         </div>
       </Section>
 
-      {/* ══════════ CLOSING CTA ══════════ */}
+      {/* ══════════ CTA ══════════ */}
       <section style={{ position: 'relative', zIndex: 1, padding: '72px 16px', textAlign: 'center', overflow: 'hidden', background: 'linear-gradient(150deg, rgba(253,220,245,0.45) 0%, rgba(235,228,252,0.45) 50%, rgba(254,240,195,0.36) 100%)', borderTop: '1px solid rgba(124,92,191,0.1)' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', width: 400, height: 400, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,92,191,0.05) 0%, rgba(194,53,122,0.025) 45%, transparent 70%)', pointerEvents: 'none' }} />
         <div id="cta-close" data-reveal style={{ position: 'relative', zIndex: 1, maxWidth: 520, margin: '0 auto', ...rv('cta-close') }}>
-          <div style={{ fontSize: 44, marginBottom: 20, display: 'inline-block', animation: 'floatGem 6s ease-in-out infinite', filter: 'drop-shadow(0 4px 16px rgba(124,92,191,0.24))' }}>◆</div>
-          <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 'clamp(26px,5vw,52px)', letterSpacing: '-0.03em', color: '#0d0b14', marginBottom: 16, lineHeight: 1.05 }}>
+          <div style={{ fontSize: 40, marginBottom: 18, display: 'inline-block', animation: 'floatGem 6s ease-in-out infinite' }}>◆</div>
+          <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: 'clamp(24px,4.5vw,48px)', letterSpacing: '-0.03em', color: '#0d0b14', marginBottom: 14, lineHeight: 1.05 }}>
             Ready to build your<br />
             <span style={{ background: 'linear-gradient(130deg, #7c3aed, #c2357a, #c9933a)', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', animation: 'shimmerTitle 3s linear infinite' }}>on-chain identity?</span>
           </h2>
-          <p style={{ fontSize: 'clamp(14px,1.6vw,16px)', fontWeight: 400, color: 'rgba(13,11,20,0.6)', marginBottom: 30, lineHeight: 1.75 }}>
+          <p style={{ fontSize: 'clamp(13px,1.5vw,15px)', fontWeight: 400, color: 'rgba(13,11,20,0.6)', marginBottom: 28, lineHeight: 1.75 }}>
             Connect your wallet, take your first action, and receive your Soulbound Token — automatically issued, permanently yours.
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/" style={{ padding: '13px 26px', borderRadius: 12, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', color: '#fff', fontSize: 14, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, textDecoration: 'none', letterSpacing: '0.03em', boxShadow: '0 8px 28px rgba(124,58,237,0.3)', animation: 'pulseGlow 3s ease-in-out infinite', transition: 'transform 0.22s ease' }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px) scale(1.02)'}
+            <a href="/" style={{ padding: '12px 24px', borderRadius: 12, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', color: '#fff', fontSize: 13, fontFamily: "'DM Sans',sans-serif", fontWeight: 600, textDecoration: 'none', letterSpacing: '0.03em', boxShadow: '0 8px 28px rgba(124,58,237,0.3)', animation: 'pulseGlow 3s ease-in-out infinite', transition: 'transform 0.22s ease' }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = 'none'}
             >Launch App →</a>
             <a href="https://github.com/NexTechArchitect/RST-Reputation-Protocol" target="_blank" rel="noopener noreferrer"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 22px', borderRadius: 12, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', color: 'rgba(13,11,20,0.62)', fontSize: 14, fontFamily: "'DM Sans',sans-serif", fontWeight: 500, textDecoration: 'none', transition: 'all 0.22s ease' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '12px 20px', borderRadius: 12, background: 'rgba(13,11,20,0.06)', border: '1px solid rgba(13,11,20,0.12)', color: 'rgba(13,11,20,0.62)', fontSize: 13, fontFamily: "'DM Sans',sans-serif", fontWeight: 500, textDecoration: 'none', transition: 'all 0.22s ease' }}
               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(124,92,191,0.1)'; el.style.color = '#7c5cbf'; el.style.borderColor = 'rgba(124,92,191,0.28)'; }}
               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(13,11,20,0.06)'; el.style.color = 'rgba(13,11,20,0.62)'; el.style.borderColor = 'rgba(13,11,20,0.12)'; }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-              View Source Code
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.835-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              Source Code
             </a>
           </div>
-          <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: 'rgba(13,11,20,0.28)', marginTop: 20, letterSpacing: '0.12em' }}>
+          <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: 'rgba(13,11,20,0.28)', marginTop: 18, letterSpacing: '0.12em' }}>
             SEPOLIA TESTNET · ERC-5484 SOULBOUND · BUILT BY NEXTECH ARCHITECT
           </p>
         </div>
@@ -900,7 +885,7 @@ export default function About() {
           <div style={{ width: 24, height: 24, borderRadius: 7, background: 'linear-gradient(135deg, #7c3aed, #c2357a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>◆</div>
           <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: 'rgba(13,11,20,0.5)' }}>RST Protocol Documentation</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
           <a href="/" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: 'rgba(13,11,20,0.4)', textDecoration: 'none', letterSpacing: '0.08em', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#7c5cbf'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(13,11,20,0.4)'}>← Back to App</a>

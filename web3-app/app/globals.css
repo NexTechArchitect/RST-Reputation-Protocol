@@ -32,6 +32,7 @@
 
 html {
   scroll-behavior: smooth;
+  /* CRITICAL FIX: prevents hero from being taller than visible area on mobile desktop mode */
   font-size: 16px;
 }
 
@@ -89,4 +90,71 @@ a { color: inherit; }
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   HERO HEIGHT FIX
+   - Problem: min-height: 100vh / 100svh on mobile desktop mode
+     gives a huge blank gap because the "viewport height" is the
+     full zoomed-out page height, not the visible window.
+   - Fix: use a pixel-capped min-height so the hero never exceeds
+     a sensible size regardless of desktop-mode zoom level.
+   ══════════════════════════════════════════════════════════════════ */
+.hero-section {
+  /* fallback for browsers without svh */
+  min-height: 600px;
+  /* use svh (small viewport height) where supported — excludes browser chrome */
+  min-height: 100svh;
+  /* hard cap: never taller than 900px on any device */
+  max-height: 900px;
+}
+
+/* On narrow screens in desktop mode (phone width ~400-700px but
+   viewport reported as 900-1200px), reduce the cap further */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 500px !important;
+    max-height: 800px !important;
+    padding-top: 80px !important;
+    padding-bottom: 48px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    min-height: 480px !important;
+    max-height: 720px !important;
+    padding-top: 72px !important;
+    padding-bottom: 40px !important;
+  }
+}
+
+/* Landscape phone — very short viewport */
+@media (max-height: 520px) {
+  .hero-section {
+    min-height: auto !important;
+    max-height: none !important;
+    padding-top: 70px !important;
+    padding-bottom: 32px !important;
+  }
+}
+
+/* ── CANVAS: hide particle canvas on touch/mobile devices ── */
+/* Applied via JS (isLowPower), but also add a CSS fallback */
+@media (pointer: coarse) {
+  canvas.particle-canvas {
+    display: none !important;
+  }
+}
+
+/* ── ORB DESKTOP ONLY ── */
+/* Orbs are purely decorative and cause GPU flicker on mobile.
+   Hide them below 1025px via this global class. */
+.orb-desktop-only {
+  display: none !important;
+}
+@media (min-width: 1025px) {
+  .orb-desktop-only {
+    display: block !important;
+  }
 }
