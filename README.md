@@ -8,7 +8,6 @@
 [![Stack](https://img.shields.io/badge/Stack-Solidity_%7C_Foundry-blueviolet.svg)](https://getfoundry.sh)
 [![Network](https://img.shields.io/badge/Network-Sepolia_Testnet-blue.svg)](https://sepolia.etherscan.io/)
 [![Standard](https://img.shields.io/badge/Standard-ERC--5484_Soulbound-orange.svg)](https://eips.ethereum.org/EIPS/eip-5484)
-[![Frontend](https://img.shields.io/badge/Frontend-Next.js_%7C_Wagmi_v2-black.svg)](https://rst-reputation-protocol.vercel.app/)
 [![Live](https://img.shields.io/badge/Live-Vercel-brightgreen.svg)](https://rst-reputation-protocol.vercel.app/)
 
 <p align="center">
