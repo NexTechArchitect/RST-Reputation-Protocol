@@ -395,9 +395,9 @@ export default function Home() {
         .orb-desktop-only {
           display: none !important;
         }
-        @media (min-width: 1025px) {
-          .orb-desktop-only {
-            display: block !important;
+       @media (min-width: 1280px) {
+           .orb-desktop-only {
+           display: block !important;
           }
         }
 
@@ -608,8 +608,7 @@ export default function Home() {
 
       {/* ══════════ HERO ══════════ */}
       <section className="hero-section" style={{
-        position: 'relative', zIndex: 1,
-        minHeight: '100vh',
+      position: 'relative', zIndex: 1,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         padding: '110px 32px 80px', textAlign: 'center', overflow: 'hidden',
       }}>
