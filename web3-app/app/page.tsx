@@ -609,7 +609,7 @@ export default function Home() {
       {/* ══════════ HERO ══════════ */}
       <section className="hero-section" style={{
         position: 'relative', zIndex: 1,
-       
+        minHeight: '100vh',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         padding: '110px 32px 80px', textAlign: 'center', overflow: 'hidden',
       }}>

@@ -109,52 +109,55 @@ a { color: inherit; }
   max-height: 900px;
 }
 
-/* On narrow screens in desktop mode (phone width ~400-700px but
-   viewport reported as 900-1200px), reduce the cap further */
+@media (max-width: 900px) {
+  .nav-links-desk { display: none !important; }
+  .nav-root { padding: 13px 20px !important; }
+  .ham-btn { display: flex !important; }
+  .tier-sidebar-arc { display: none !important; }
+  .actions-two-col { grid-template-columns: 1fr !important; gap: 0 !important; }
+  .actions-divider-v { display: none !important; }
+  .contracts-grid { grid-template-columns: 1fr !important; }
+  .stats-row { flex-wrap: wrap; gap: 22px !important; }
+  .hero-btns { flex-direction: column; align-items: center !important; }
+  .footer-addrs { display: none !important; }
+  .tier-showcase-inner { flex-direction: column !important; gap: 24px !important; }
+  .actions-light-hero { flex-direction: column !important; padding: 36px 24px !important; }
+  .actions-score-viz { display: none !important; }
+  .gains-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ─── KEY FIX: Mobile hero gap ─── */
 @media (max-width: 768px) {
+  /* Remove the massive top padding that pushes content down */
   .hero-section {
-    min-height: 500px !important;
-    max-height: 800px !important;
-    padding-top: 80px !important;
-    padding-bottom: 48px !important;
+    padding: 88px 20px 60px !important;
+    min-height: auto !important;          /* Don't force 100vh — let content breathe */
+    justify-content: flex-start !important;
+    align-items: center !important;
   }
+  /* Section pads tighten up */
+  .section-pad { padding: 64px 20px !important; }
+  .actions-section-inner { padding: 64px 20px !important; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+  /* Hero — tight and clean */
   .hero-section {
-    min-height: 480px !important;
-    max-height: 720px !important;
-    padding-top: 72px !important;
-    padding-bottom: 40px !important;
-  }
-}
-
-/* Landscape phone — very short viewport */
-@media (max-height: 520px) {
-  .hero-section {
+    padding: 80px 18px 52px !important;
     min-height: auto !important;
-    max-height: none !important;
-    padding-top: 70px !important;
-    padding-bottom: 32px !important;
+    justify-content: flex-start !important;
   }
+  /* All other sections */
+  .section-pad { padding: 56px 18px !important; }
+  .actions-section-inner { padding: 56px 18px !important; }
+  /* Typography scale down */
+  .tier-stat-pills { flex-wrap: wrap; }
+  .heading-shimmer { font-size: clamp(28px, 8vw, 46px) !important; }
+  /* Contract cards inner padding */
+  .contract-card-inner { padding: 28px 20px !important; }
 }
 
-/* ── CANVAS: hide particle canvas on touch/mobile devices ── */
-/* Applied via JS (isLowPower), but also add a CSS fallback */
-@media (pointer: coarse) {
-  canvas.particle-canvas {
-    display: none !important;
-  }
-}
-
-/* ── ORB DESKTOP ONLY ── */
-/* Orbs are purely decorative and cause GPU flicker on mobile.
-   Hide them below 1025px via this global class. */
-.orb-desktop-only {
-  display: none !important;
-}
-@media (min-width: 1025px) {
-  .orb-desktop-only {
-    display: block !important;
-  }
+@media (max-width: 420px) {
+  .nav-root { padding: 11px 14px !important; }
+  .hero-section { padding: 74px 16px 48px !important; }
 }
