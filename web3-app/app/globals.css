@@ -32,7 +32,6 @@
 
 html {
   scroll-behavior: smooth;
-  /* CRITICAL FIX: prevents hero from being taller than visible area on mobile desktop mode */
   font-size: 16px;
 }
 
@@ -93,20 +92,19 @@ a { color: inherit; }
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   HERO HEIGHT FIX
-   - Problem: min-height: 100vh / 100svh on mobile desktop mode
-     gives a huge blank gap because the "viewport height" is the
-     full zoomed-out page height, not the visible window.
-   - Fix: use a pixel-capped min-height so the hero never exceeds
-     a sensible size regardless of desktop-mode zoom level.
+   HERO HEIGHT — THE FIX
+   ─────────────────────────────────────────────────────────────────
+   PROBLEM: inline minHeight:'100vh' in page.tsx was overriding this
+   CSS max-height. In mobile desktop mode 100vh ≈ 980px > 900px, so
+   the hero stretched to 980px while content was only ~550px tall.
+   justify-content:center then left ~215px dead space below content.
+
+   FIX: no vh units here at all. Height is determined purely by
+   padding (set inline on the section). This works on every device.
    ══════════════════════════════════════════════════════════════════ */
 .hero-section {
-  /* fallback for browsers without svh */
-  min-height: 600px;
-  /* use svh (small viewport height) where supported — excludes browser chrome */
-  min-height: 100svh;
-  /* hard cap: never taller than 900px on any device */
-  max-height: 900px;
+  min-height: auto !important;
+  max-height: none !important;
 }
 
 @media (max-width: 900px) {
@@ -126,34 +124,22 @@ a { color: inherit; }
   .gains-grid { grid-template-columns: 1fr !important; }
 }
 
-/* ─── KEY FIX: Mobile hero gap ─── */
 @media (max-width: 768px) {
-  /* Remove the massive top padding that pushes content down */
   .hero-section {
     padding: 88px 20px 60px !important;
-    min-height: auto !important;          /* Don't force 100vh — let content breathe */
-    justify-content: flex-start !important;
-    align-items: center !important;
   }
-  /* Section pads tighten up */
   .section-pad { padding: 64px 20px !important; }
   .actions-section-inner { padding: 64px 20px !important; }
 }
 
 @media (max-width: 600px) {
-  /* Hero — tight and clean */
   .hero-section {
     padding: 80px 18px 52px !important;
-    min-height: auto !important;
-    justify-content: flex-start !important;
   }
-  /* All other sections */
   .section-pad { padding: 56px 18px !important; }
   .actions-section-inner { padding: 56px 18px !important; }
-  /* Typography scale down */
   .tier-stat-pills { flex-wrap: wrap; }
   .heading-shimmer { font-size: clamp(28px, 8vw, 46px) !important; }
-  /* Contract cards inner padding */
   .contract-card-inner { padding: 28px 20px !important; }
 }
 
