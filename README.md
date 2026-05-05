@@ -15,7 +15,7 @@
   <b>A fully on-chain reputation protocol built on ERC-5484 Soulbound Tokens.</b><br>
   <i>Wallet behaviour tracked on-chain. Score evolves. Medal art upgrades automatically. No IPFS dependency.</i>
   <br>
-</p>
+</p> 
 
 <br>
 
