@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🛡️ ERC-5484 On-Chain Reputation System
-
+ 
 ### Soulbound Identity · Dynamic NFT Medals · UUPS Upgradeable Engine
 
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
