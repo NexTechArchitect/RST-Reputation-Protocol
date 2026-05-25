@@ -307,11 +307,6 @@ npm run dev
 
 ---
 
-## ⚠️ Disclaimer
-
-This repository is for educational and portfolio purposes. The smart contracts implement production-grade patterns and have been thoroughly self-audited, but have **not undergone a formal external security audit**. Do not use with real funds without a professional security review.
-
----
 
 <div align="center">
 
