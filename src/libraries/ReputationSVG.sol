@@ -10,17 +10,6 @@ import {ReputationMath} from "./ReputationMath.sol";
 /// @notice Pure library — generates fully on-chain SVG medal art and ERC-721
 ///         JSON metadata for each Reputation tier.
 ///
-/// @dev    ARCHITECTURE
-///         ─────────────
-///         • Zero state, zero external calls — pure functions only.
-///         • One SVG per tier, each distinct in colour + iconography.
-///         • buildTokenURI() is the sole public entry point: takes a tier +
-///           tokenId, returns a complete data:application/json;base64,... URI
-///           that wallets (MetaMask, OpenSea) can render directly.
-///         • All SVG strings are built with string concatenation — no assembly,
-///           no external renderer, no IPFS dependency. Token lives as long as
-///           Ethereum exists.
-///
 ///         TIER → MEDAL DESIGN MAPPING
 ///         ─────────────────────────────
 ///         Unranked  → grey hexagon  + "?" glyph
