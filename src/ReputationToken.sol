@@ -12,14 +12,6 @@ import {ReputationMath}   from "./libraries/ReputationMath.sol";
 /// @author NexTechArchitect
 /// @notice ERC-5484 Soulbound Reputation Token — immutable, one per wallet.
 ///
-/// @dev    WHY IMMUTABLE (not upgradeable)
-///         ──────────────────────────────────
-///         SBT ownership records are the ground truth of on-chain identity.
-///         An upgradeable token would let the owner silently rewrite who owns
-///         which token or remove the transfer lock — breaking the soulbound
-///         guarantee entirely. Immutability here is a feature, not a limitation.
-///         The engine (scoring logic) can be a separate upgradeable contract.
-///
 ///         ARCHITECTURE
 ///         ─────────────
 ///         • Standard OZ ERC721 + Ownable (non-upgradeable).
@@ -32,15 +24,6 @@ import {ReputationMath}   from "./libraries/ReputationMath.sol";
 ///         • s_tokenCounter starts at 1 — 0 is the "no token" sentinel.
 ///         • s_engine is write-once (set once via setEngine, then locked) — engine
 ///           address becomes permanently immutable after deployment setup.
-///
-///         SECURITY INVARIANTS
-///         ────────────────────
-///         • One SBT per wallet — s_walletToToken[to] != 0 guard in issue().
-///         • Only s_engine may call issue() / burn().
-///         • All transfer paths revert via _update override.
-///         • burn() clears s_walletToToken BEFORE _burn (CEI).
-///         • setEngine() is one-time only — reverts if called again.
-///         • No reentrancy surface: _mint has no external callback.
 
 contract ReputationToken is ERC721, Ownable, IReputationToken {
 
@@ -89,7 +72,6 @@ contract ReputationToken is ERC721, Ownable, IReputationToken {
     //////////////////////////////////////////////////////////////*/
 
     /// @param initialOwner  Address that receives Ownable ownership.
-    /// @dev   [FIX-C1] ZeroAddress is now declared in the interface, so this
     ///        revert is fully visible to callers who only import IReputationToken.
     constructor(address initialOwner)
         ERC721("Reputation Soulbound Token", "RST")
@@ -123,15 +105,6 @@ contract ReputationToken is ERC721, Ownable, IReputationToken {
     //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc IReputationToken
-    /// @dev    [FIX-M1] @inheritdoc now resolves correctly because setEngine()
-    ///         is declared in the interface.
-    ///         ONE-TIME ONLY — reverts with EngineAlreadySet if called again.
-    ///         Rationale: engine replacement would let a compromised owner silently
-    ///         redirect all future issuance and burns to a malicious contract.
-    ///
-    ///         PRODUCTION NOTE: transfer Ownable ownership to a 2-of-3 multisig
-    ///         (e.g. Gnosis Safe) or TimelockController BEFORE calling setEngine().
-    ///         A single EOA owner has no delay window — key compromise = instant attack.
     function setEngine(address engine) external onlyOwner {
   
         if (engine == address(0))    revert IReputationToken__ZeroAddress();
@@ -147,11 +120,6 @@ contract ReputationToken is ERC721, Ownable, IReputationToken {
     //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc IReputationToken
-    /// @dev    CEI order:
-    ///           1. Checks  — zero address, duplicate SBT
-    ///           2. Effects — tokenId assigned, mappings + counters updated
-    ///           3. Interact — _mint (internal — no external callback, no reentrancy)
-    ///           4. Event   — emit Issued after all state is settled
     function issue(address to) external onlyEngine returns (uint256 tokenId) {
 
         if (to == address(0))         revert IReputationToken__ZeroAddress();
@@ -170,11 +138,6 @@ contract ReputationToken is ERC721, Ownable, IReputationToken {
     }
 
     /// @inheritdoc IReputationToken
-    /// @dev    CEI order:
-    ///           1. Checks  — token must exist (_ownerOf != address(0))
-    ///           2. Effects — mapping cleared, supply decremented (BEFORE _burn)
-    ///           3. Interact — _burn (internal)
-    ///           4. Event   — emit Burned
     ///
     ///         Clearing s_walletToToken BEFORE _burn is critical:
     ///         if _burn somehow triggered a reentrant call (e.g. via a future
@@ -210,8 +173,6 @@ contract ReputationToken is ERC721, Ownable, IReputationToken {
     }
 
     /// @inheritdoc IReputationToken
-    /// @dev [FIX-N1] Derived from the same storage slot as tokenOf() —
-    ///      single SLOAD. No separate boolean mapping, no desync risk on burn.
     function hasSBT(address wallet) external view returns (bool) {
         return s_walletToToken[wallet] != 0;
     }
@@ -233,14 +194,6 @@ contract ReputationToken is ERC721, Ownable, IReputationToken {
     /// @notice Returns the on-chain metadata URI for a given tokenId.
     /// @dev    Calls the engine to fetch the wallet's current tier and score,
     ///         then delegates to ReputationSVG to build the full data URI.
-    ///
-    ///         DESIGN NOTE: tokenURI is dynamic — it reflects the wallet's
-    ///         CURRENT tier, not the tier at mint time. As a wallet earns more
-    ///         reputation, the medal art upgrades automatically with no re-mint.
-    ///
-    ///         SECURITY: s_engine is read-only here. No state change occurs.
-    ///         The engine call is a view — no reentrancy risk.
-    ///
     /// @param  tokenId  Must exist. Reverts with TokenDoesNotExist otherwise.
     function tokenURI(uint256 tokenId)
         public
@@ -248,7 +201,6 @@ contract ReputationToken is ERC721, Ownable, IReputationToken {
         override
         returns (string memory)
     {
-        // ── Check ─────────────────────────────────────────────────
         address owner = _ownerOf(tokenId);
         if (owner == address(0)) revert IReputationToken__TokenDoesNotExist(tokenId);
 
@@ -272,11 +224,6 @@ contract ReputationToken is ERC721, Ownable, IReputationToken {
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Override the lowest-level ERC721 state-transition hook.
-    ///
-    ///      OZ ERC721 v5 calls _update() for every state transition:
-    ///        Mint:     from == address(0), to == recipient  → allowed
-    ///        Burn:     from == owner,      to == address(0) → allowed
-    ///        Transfer: from == owner,      to == recipient  → BLOCKED
 
     function _update(
         address to,
