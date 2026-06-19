@@ -307,7 +307,6 @@ npm run dev
 
 ---
 
-
 <div align="center">
 
 **Engineered with ❤️ by [NexTech Architect](https://github.com/NexTechArchitect)**
