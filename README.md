@@ -309,7 +309,7 @@ npm run dev
 
 <div align="center">
 
-**Engineered with ❤️ by [NexTech Architect](https://github.com/NexTechArchitect)**
+**Engineered by [NexTech Architect](https://github.com/NexTechArchitect)**
 
 [🌐 Live Demo](https://rst-reputation-protocol.vercel.app/) · [Connect on 𝕏](https://x.com/itZ_AmiT0)
 
