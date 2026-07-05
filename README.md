@@ -65,18 +65,6 @@ The scoring engine is **UUPS upgradeable** - logic can evolve as the protocol ma
 - **Scroll-reveal sections** — intersection observer based section animations
 - **Particle canvas background** — same as landing page, with comet trails
 
-### Run Locally
-
-```bash
-cd web3-app
-npm install
-npm run dev
-```
-
-> Requires MetaMask or any RainbowKit-supported wallet connected to **Sepolia Testnet**.
-
-
-
 ### Key Design Decisions
 
 | Decision | Rationale |
