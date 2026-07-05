@@ -221,15 +221,6 @@ forge install OpenZeppelin/openzeppelin-contracts-upgradeable --no-commit
 forge install foundry-rs/forge-std --no-commit
 ```
 
-Create a `.env` file:
-
-```bash
-PRIVATE_KEY=0x...
-DEPLOYER_ADDRESS=0x...
-SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
-ETHERSCAN_API_KEY=...
-```
-
 ```bash
 forge build
 forge test -v
