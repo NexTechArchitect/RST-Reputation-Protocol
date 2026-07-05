@@ -37,7 +37,7 @@ On-chain identity is broken. Wallets are anonymous. There is no way to distingui
 
 The ERC-5484 Reputation System assigns every wallet a **Soulbound Token** — non-transferable, non-mintable by the holder — that reflects their on-chain behaviour score. As the wallet performs positive actions (DAO votes, loan repayments, airdrop holding), their score rises and their medal art upgrades **automatically with no re-mint required**.
 
-The scoring engine is **UUPS upgradeable** — logic can evolve as the protocol matures. The token contract is **intentionally immutable** — SBT ownership records are the ground truth of on-chain identity and must be permanent.
+The scoring engine is **UUPS upgradeable** - logic can evolve as the protocol matures. The token contract is **intentionally immutable** - SBT ownership records are the ground truth of on-chain identity and must be permanent.
 
 ---
 
@@ -89,36 +89,7 @@ npm run dev
 
 > Requires MetaMask or any RainbowKit-supported wallet connected to **Sepolia Testnet**.
 
----
 
-## 🏛️ Architecture
-
-The system is split into three layers with clear separation of concerns:
-
-```
-┌─────────────────────────────────────────────────────┐
-│                     USER / DAPP                      │
-│         Wagmi v2 · Viem · RainbowKit (Frontend)      │
-└────────────────────┬────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────┐
-│              REPUTATION VAULT                        │
-│   castVote() · takeLoan() · claimAirdrop() · ...     │
-│   12h / 24h cooldowns · CEI strict · nonReentrant    │
-└────────────────────┬────────────────────────────────┘
-                     │ recordAction()
-┌────────────────────▼────────────────────────────────┐
-│         REPUTATION ENGINE  (UUPS Proxy)              │
-│   Score calculation · Tier resolution · SBT issuer   │
-│   ReputationMath library · Storage gap pattern       │
-└──────────┬──────────────────────────────────────────┘
-           │ issue() / burn()
-┌──────────▼──────────────────────────────────────────┐
-│         REPUTATION TOKEN  (Immutable)                │
-│   ERC-5484 Soulbound · On-chain SVG medals           │
-│   _update() transfer lock · ERC-165 registered       │
-└─────────────────────────────────────────────────────┘
-```
 
 ### Key Design Decisions
 
