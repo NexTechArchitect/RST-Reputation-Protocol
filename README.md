@@ -54,20 +54,6 @@ The scoring engine is **UUPS upgradeable** - logic can evolve as the protocol ma
 
 ---
 
-## 🌐 Frontend App
-
-A production-grade Web3 frontend ships alongside the protocol, deployed live at **[rst-reputation-protocol.vercel.app](https://rst-reputation-protocol.vercel.app/)**.
-
-### Stack
-
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router) |
-| Web3 | Wagmi v2 · Viem · RainbowKit |
-| Styling | Inline CSS · CSS Animations · Canvas API |
-| Deployment | Vercel |
-| Network | Ethereum Sepolia Testnet |
-
 ### Features
 
 - **Live reputation dashboard** — real-time score, tier, voting power, and loan access pulled directly from contracts
