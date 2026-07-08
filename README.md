@@ -237,10 +237,6 @@ cd web3-app
 npm install
 npm run dev
 # → http://localhost:3000
-```
-
-> Connect any RainbowKit-supported wallet to **Sepolia Testnet** to interact.
-
 ---
 
 <div align="center">
