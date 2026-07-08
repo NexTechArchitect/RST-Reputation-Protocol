@@ -202,34 +202,6 @@ forge test --match-path test/fuzz/* -vvvv
 
 ---
 
-## 🚀 Local Setup
-
-### Prerequisites
-
-- [Foundry](https://getfoundry.sh) (nightly)
-- Node.js 18+ (for frontend)
-- Git
-
-### Smart Contracts
-
-```bash
-git clone https://github.com/NexTechArchitect/ERC-5484.git
-cd ERC-5484
-
-forge install OpenZeppelin/openzeppelin-contracts --no-commit
-forge install OpenZeppelin/openzeppelin-contracts-upgradeable --no-commit
-forge install foundry-rs/forge-std --no-commit
-```
-
-```bash
-forge build
-forge test -v
-
-# Deploy to Sepolia
-source .env && forge script script/DeployReputation.s.sol:DeployReputation \
-  --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv
-```
-
 ### Frontend
 
 ```bash
@@ -239,6 +211,7 @@ npm run dev
 # → http://localhost:3000
 ---
 
+```
 <div align="center">
 
 **Engineered by [NexTech Architect](https://github.com/NexTechArchitect)**
