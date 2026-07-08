@@ -177,16 +177,6 @@ test/
 └── fuzz/
     └── FuzzReputation.t.sol        # Score bounds, loan math, SBT uniqueness
 ```
-
-### Key Test Scenarios
-
-- **Score never exceeds 1000** — fuzz tested across 50+ random action sequences
-- **Score never underflows to negative** — loan default on zero score → still zero
-- **Cooldown enforcement** — exact timestamp boundary testing
-- **Diamond hands vs paper hands** — airdrop held 30d vs immediate settle
-- **CEI verification** — mock engine tracks call order in vault tests
-- **SBT uniqueness** — fuzz tested across random wallet addresses
-
 ### Run Tests
 
 ```bash
