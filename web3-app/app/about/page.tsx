@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 
 const CONTRACTS = [
   {
-    num: '01', name: 'ReputationToken', tag: 'ERC-5484 · Immutable', c: '#e11d7a',
+    num: '01', name: 'ReputationToken', tag: 'ERC-5484 · Immutable', c: '#e11d7a', 
     addr: '0x9c77Ce31...F70F46',
     fullAddr: '0x9c77Ce31a110e360d62e4eF8B1F4cf8576F70F46',
     etherscan: 'https://sepolia.etherscan.io/address/0x9c77Ce31a110e360d62e4eF8B1F4cf8576F70F46',
