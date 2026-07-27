@@ -16,7 +16,7 @@
   <i>Wallet behaviour tracked on-chain. Score evolves. Medal art upgrades automatically. No IPFS dependency.</i>
   <br>
 </p> 
-
+ 
 <br>
 
 <p align="center">
