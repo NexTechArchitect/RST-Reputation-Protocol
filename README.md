@@ -177,20 +177,6 @@ test/
 └── fuzz/
     └── FuzzReputation.t.sol        # Score bounds, loan math, SBT uniqueness
 ```
-### Run Tests
-
-```bash
-# Full suite
-forge test -v
-
-# Vault tests only
-forge test --match-contract ReputationVaultTest -vvvv
-
-# Fuzz tests
-forge test --match-path test/fuzz/* -vvvv
-```
-
----
 
 ### Frontend
 
