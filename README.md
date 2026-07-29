@@ -35,7 +35,7 @@
 
 On-chain identity is broken. Wallets are anonymous. There is no way to distinguish a DeFi power user from a fresh wallet. **This protocol fixes that.**
 
-The ERC-5484 Reputation System assigns every wallet a **Soulbound Token** — non-transferable, non-mintable by the holder — that reflects their on-chain behaviour score. As the wallet performs positive actions (DAO votes, loan repayments, airdrop holding), their score rises and their medal art upgrades **automatically with no re-mint required**.
+The ERC-5484 Reputation System assigns every wallet a **Soulbound Token**, non-transferable, non-mintable by the holder that reflects their on-chain behaviour score. As the wallet performs positive actions (DAO votes, loan repayments, airdrop holding), their score rises and their medal art upgrades **automatically with no re-mint required**.
 
 The scoring engine is **UUPS upgradeable** - logic can evolve as the protocol matures. The token contract is **intentionally immutable** - SBT ownership records are the ground truth of on-chain identity and must be permanent.
 
