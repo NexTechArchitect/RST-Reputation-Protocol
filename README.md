@@ -74,7 +74,7 @@ The scoring engine is **UUPS upgradeable** - logic can evolve as the protocol ma
 | **On-chain SVG** medals | Zero IPFS dependency — token lives as long as Ethereum |
 | **Dynamic metadata** | `tokenURI()` reads live score from engine — medal upgrades on score change, no re-mint |
 | **`_mint` not `_safeMint`** | SBTs have no receiver contract — `onERC721Received` is meaningless and adds reentrancy surface |
-| **`_update()` override** | Exhaustively blocks all OZ transfer paths in one hook |
+| **`_update()` override** | Exhaustively blocks all OZ transfer paths in one hook | 
 
 ---
 
