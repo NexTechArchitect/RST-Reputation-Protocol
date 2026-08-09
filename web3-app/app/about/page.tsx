@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-// ── DATA ─────────────────────────────────────────────────────────────────────
-
 const CONTRACTS = [
   {
     num: '01', name: 'ReputationToken', tag: 'ERC-5484 · Immutable', c: '#e11d7a', 
