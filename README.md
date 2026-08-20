@@ -185,7 +185,6 @@ cd web3-app
 npm install
 npm run dev
 # → http://localhost:3000
----
  
 ```
 <div align="center">
