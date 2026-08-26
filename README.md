@@ -33,7 +33,7 @@
 
 On-chain identity is broken. Wallets are anonymous. There is no way to distinguish a DeFi power user from a fresh wallet. This protocol fixes that.
 
-The ERC-5484 Reputation System assigns every wallet a Soulbound Token, non-transferable, non-mintable by the holder, that reflects their on-chain behaviour score. As the wallet performs positive actions (DAO votes, loan repayments, airdrop holding), their score rises and their medal art upgrades automatically with no re-mint required.
+The ERC-5484 Reputation System assigns every wallet a Soulbound Token, non-transferable and non-mintable by the holder, that reflects their on-chain behaviour score. As the wallet performs positive actions (DAO votes, loan repayments, airdrop holding), their score rises and their medal art upgrades automatically with no re-mint required.
 
 The scoring engine is UUPS upgradeable so logic can evolve as the protocol matures. The token contract is intentionally immutable because SBT ownership records are the ground truth of on-chain identity and must be permanent.
 
@@ -56,12 +56,12 @@ Live reputation dashboard pulls real-time score, tier, voting power, and loan ac
 
 | Decision | Rationale |
 |---|---|
-| Token is **immutable** | SBT ownership is ground truth — upgradeability would allow silent record tampering |
-| Engine is **UUPS upgradeable** | Scoring logic must evolve; token state must not |
-| **On-chain SVG** medals | Zero IPFS dependency — token lives as long as Ethereum |
-| **Dynamic metadata** | `tokenURI()` reads live score from engine — medal upgrades on score change, no re-mint |
-| **`_mint` not `_safeMint`** | SBTs have no receiver contract — `onERC721Received` is meaningless and adds reentrancy surface |
-| **`_update()` override** | Exhaustively blocks all OZ transfer paths in one hook |
+| Token is immutable | SBT ownership is ground truth. Upgradeability would allow silent record tampering |
+| Engine is UUPS upgradeable | Scoring logic must evolve; token state must not |
+| On-chain SVG medals | Zero IPFS dependency. Token lives as long as Ethereum |
+| Dynamic metadata | `tokenURI()` reads live score from engine. Medal upgrades on score change, no re-mint |
+| `_mint` not `_safeMint` | SBTs have no receiver contract. `onERC721Received` is meaningless and adds reentrancy surface |
+| `_update()` override | Exhaustively blocks all OZ transfer paths in one hook |
 
 ## ✅ Deployed Contracts
 
@@ -129,11 +129,11 @@ Enum-gated deltas mean arbitrary `int256` deltas are never exposed, only `Action
 |---|---|
 | One SBT per wallet | `s_walletToToken[to] != 0` check in `issue()` |
 | Engine address immutable post-deploy | `setEngine()` reverts with `EngineAlreadySet` on second call |
-| Transfer always reverts | `_update()` override — catches all OZ paths |
-| Score always in [0, 1000] | `ReputationMath.applyAction()` — clamped by design |
+| Transfer always reverts | `_update()` override catches all OZ paths |
+| Score always in [0, 1000] | `ReputationMath.applyAction()` clamped by design |
 | All storage writes before external calls | Strict CEI in `recordAction()` and all Vault functions |
-| No re-entrancy | `nonReentrant` on all state-changing engine + vault functions |
-| SBT auto-issued on first action | `token.issue()` called last in CEI — after all storage writes |
+| No re-entrancy | `nonReentrant` on all state-changing engine and vault functions |
+| SBT auto-issued on first action | `token.issue()` called last in CEI after all storage writes |
 
 ## 🧪 Testing Strategy
 
